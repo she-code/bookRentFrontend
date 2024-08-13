@@ -39,14 +39,21 @@ export const request = async (
     url = `${API_BASE_URL}${endpoint}`;
     payload = data ? JSON.stringify(data) : "";
   }
+  const token = localStorage.getItem("token");
+
+  // Construct headers with the Authorization Bearer token if it exists
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   try {
     const response = await fetch(url, {
       method: method,
-      // mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: headers,
       credentials: "include",
 
       body: method !== "GET" ? payload : null,
