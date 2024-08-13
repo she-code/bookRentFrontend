@@ -16,6 +16,8 @@ import RentsPage from "../features/Rent/RentsPage";
 const router = createBrowserRouter([
   { path: "/", element: <HomePage /> },
   { path: "/login", element: <RedirectWrapper element={<LoginPage />} /> },
+  { path: "/adminSignup", element: <SignUpPage /> },
+  { path: "/ownerSignup", element: <SignUpPage /> },
   { path: "/signup", element: <SignUpPage /> },
 
   {

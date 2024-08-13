@@ -83,7 +83,7 @@ export const registerAsOwner = (user: User) => {
   return request("auth/registerAsOwner", "POST", user);
 };
 export const registerUser = (user: User) => {
-  return request("auth/registerUser", "POST", user);
+  return request("auth/register", "POST", user);
 };
 export const logout = () => {
   return request("auth/logout", "POST", {});

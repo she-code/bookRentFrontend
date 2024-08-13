@@ -146,7 +146,11 @@ const NavBar: React.FC = () => {
                   variant="contained"
                   handleClick={() => navigate("/login")}
                 />{" "}
-                <LinkButton to="/signup" text="Register As Owner" width={400} />
+                <LinkButton
+                  to="/ownerSignup"
+                  text="Register As Owner"
+                  width={400}
+                />
               </>
             )}
           </Box>
