@@ -6,7 +6,7 @@ import { Book } from "../../types/bookTypes";
 import LinkButton from "../Button/LinkButton";
 import { Link } from "react-router-dom";
 import CustomText from "../Typography/CustomText";
-
+import defaultImage from "../../assets/default-image.jpg";
 export default function CustomCard(props: { data: Book }) {
   const { data } = props;
   const bookImage =
@@ -37,7 +37,7 @@ export default function CustomCard(props: { data: Book }) {
           <CardMedia
             component="img"
             height="200"
-            image={bookImage}
+            image={bookImage || defaultImage}
             alt="book image"
           />
         </Link>

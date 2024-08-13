@@ -18,7 +18,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { addRent } from "../Rent/rentAction";
 import NavBar from "../../components/Navigation/NavBar";
 import { addRentSuccess } from "../Rent/rentSlice";
-
+import defaultImage from "../../assets/default-image.jpg";
 export default function CheckoutPage() {
   // Initial state for quantity
   const [quantity, setQuantity] = useState<number>(1);
@@ -124,7 +124,7 @@ export default function CheckoutPage() {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={bookCopy?.image || "/default-image.png"} // Default image if not available
+                      image={bookCopy?.image || defaultImage} // Default image if not available
                       alt={bookCopy?.book?.book_title || "Book Image"}
                     />
                     <CardContent>

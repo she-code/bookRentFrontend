@@ -17,6 +17,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { setLoading } from "./bookSlice";
 import CustomButton from "../../components/Button/CustomButton";
 import NavBar from "../../components/Navigation/NavBar";
+import defaultImage from "../../assets/default-image.jpg";
 
 export default function BookDetailsPage() {
   const dispatch = useAppDispacth();
@@ -137,7 +138,7 @@ export default function BookDetailsPage() {
                 <CardMedia
                   component="img"
                   height="400"
-                  image={bookImage}
+                  image={bookImage || defaultImage}
                   alt={book?.book_title || "Book Image"}
                 />
               </Card>
