@@ -1,8 +1,7 @@
 import { Box, Container, Grid, Typography } from "@mui/material";
 import { MenuBookOutlined } from "@mui/icons-material";
 import Logo from "../../../components/Typography/Logo";
-// import { useForm, Controller } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
+
 import { z } from "zod";
 import CustomText from "../../../components/Typography/CustomText";
 import { signUpUser } from "../authActions";

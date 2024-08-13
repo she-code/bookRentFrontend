@@ -12,12 +12,28 @@ import {
   login,
   logout,
   registerAsOwner,
+  registerUser,
 } from "../../utils/apitUtils";
 import { User } from "../../types/userTypes";
 import { LoginPayload } from "../../types/authTypes";
 
 export const signUpUser = createAsyncThunk(
   "auth/signUpUser",
+  async (user: User, { dispatch }) => {
+    try {
+      dispatch(requestStart());
+      const response = await registerUser(user);
+
+      return response;
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+      return { statusCode: 500, error: (error as string).toString() };
+      // throw error; // Rethrow error to be caught in the component
+    }
+  }
+);
+export const signUpOwner = createAsyncThunk(
+  "auth/signUpOwner",
   async (user: User, { dispatch }) => {
     try {
       dispatch(requestStart());
@@ -31,7 +47,6 @@ export const signUpUser = createAsyncThunk(
     }
   }
 );
-
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload: LoginPayload, { dispatch }) => {
