@@ -13,6 +13,7 @@ import RedirectWrapper from "./RedirectWrapper";
 import BookDetailsPage from "../features/Book/BookDetailsPage";
 import CategoryFilteredPage from "../features/Category/CategoryFilteredPage";
 import RentsPage from "../features/Rent/RentsPage";
+import NotFoundPage from "./NotFoundPage";
 const router = createBrowserRouter([
   { path: "/", element: <HomePage /> },
   { path: "/login", element: <RedirectWrapper element={<LoginPage />} /> },
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
   {
     path: "/bookDetails/:id",
     element: <BookDetailsPage />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 export default router;
