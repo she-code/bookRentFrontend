@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Book } from "../../types/bookTypes";
+import { BookCopy } from "../../types/bookTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchBookRequests, updateBookStatusThunk } from "./bookActions";
 import { Box } from "@mui/material";
@@ -9,6 +9,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import CustomButton from "../../components/Button/CustomButton";
+import CustomText from "../../components/Typography/CustomText";
 
 const BookRequests = () => {
   const dispatch = useAppDispacth();
@@ -19,29 +20,32 @@ const BookRequests = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const bookData = requestedBooks;
+  const bookData = requestedBooks?.length > 0 ? requestedBooks : [];
 
   function handleApprove(id: number | undefined): void {
     if (id !== undefined) {
-      dispatch(updateBookStatusThunk({ id, status: "approved" }));
+      dispatch(updateBookStatusThunk({ id, status: "approve" }));
     }
   }
 
   function handleReject(id: number | undefined): void {
     if (id !== undefined) {
-      dispatch(updateBookStatusThunk({ id, status: "rejected" }));
+      dispatch(updateBookStatusThunk({ id, status: "reject" }));
     }
   }
-  const columns: MRT_ColumnDef<Book>[] = [
+
+  const columns: MRT_ColumnDef<BookCopy>[] = [
     {
-      accessorKey: "book_title",
-      header: "Title",
+      accessorKey: "id",
+      header: "Copy Id",
       size: 100,
+      enableColumnFilter: false,
     },
     {
-      accessorKey: "author",
-      header: "Author",
+      accessorKey: "book",
+      header: "Title",
       size: 100,
+      Cell: ({ cell }) => `${cell.getValue<BookCopy["book"]>()?.book_title}`,
     },
     {
       accessorKey: "createdAt",
@@ -54,25 +58,38 @@ const BookRequests = () => {
       enableColumnFilter: false,
     },
     {
-      accessorKey: "User",
+      accessorKey: "availability",
+      header: "Availability",
+      size: 100,
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "owner",
       header: "Owner",
       size: 150,
       Cell: ({ cell }) =>
-        `${cell.getValue<Book["User"]>()?.firstName} ${
-          cell.getValue<Book["User"]>()?.lastName
+        `${cell.getValue<BookCopy["owner"]>()?.firstName} ${
+          cell.getValue<BookCopy["owner"]>()?.lastName
         }`,
     },
     {
-      accessorKey: "Category",
-      header: "Category",
-      size: 150,
-      Cell: ({ cell }) => cell.getValue<Book["Category"]>()?.category_name,
+      accessorKey: "book",
+      header: "Author",
+      size: 100,
+      Cell: ({ cell }) => `${cell.getValue<BookCopy["book"]>()?.author}`,
     },
     {
-      accessorKey: "User",
+      accessorKey: "book",
+      header: "Category",
+      size: 150,
+      Cell: ({ cell }) =>
+        cell.getValue<BookCopy["book"]>()?.Category?.category_name,
+    },
+    {
+      accessorKey: "owner",
       header: "Location",
       size: 100,
-      Cell: ({ cell }) => cell.getValue<Book["User"]>()?.location,
+      Cell: ({ cell }) => cell.getValue<BookCopy["owner"]>()?.location,
     },
     {
       accessorKey: "quantity",
@@ -81,26 +98,26 @@ const BookRequests = () => {
       enableColumnFilter: false,
       enableSorting: true,
     },
-
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: "condition",
+      header: "Condition",
       size: 100,
       enableColumnFilter: false,
       enableSorting: true,
     },
     {
-      accessorKey: "rent_amount",
-      header: "Rent Amount",
+      accessorKey: "rentalPrice",
+      header: "Rent Price",
       size: 100,
       enableColumnFilter: false,
       enableSorting: true,
     },
-
     {
       accessorKey: "actions",
       header: "Actions",
       size: 150,
+      enableColumnFilter: false,
+      enableSorting: false,
       Cell: ({ row }) => (
         <Box display="flex" justifyContent="space-between">
           <CustomButton
@@ -120,19 +137,37 @@ const BookRequests = () => {
           />
         </Box>
       ),
-      enableColumnFilter: false,
-      enableSorting: false,
     },
   ];
 
-  const table = useMaterialReactTable<Book>({
+  const table = useMaterialReactTable<BookCopy>({
     columns,
     data: bookData,
-    initialState: { showColumnFilters: true },
+
+    initialState: {
+      showColumnFilters: true,
+      columnOrder: [
+        "id",
+        "book",
+        "owner",
+        "createdAt",
+        "quantity",
+        "rentalPrice",
+        "condition",
+        "actions",
+      ],
+    },
   });
 
   return (
-    <Box width={"95%"} mt={4}>
+    <Box mt={4}>
+      <CustomText
+        text="Book Requests"
+        fontSize={24}
+        fontWeight={500}
+        mb={3}
+        mt={3}
+      />
       <MaterialReactTable table={table} />
     </Box>
   );

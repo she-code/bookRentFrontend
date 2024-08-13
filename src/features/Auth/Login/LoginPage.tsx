@@ -1,10 +1,10 @@
-import { Container, Grid, Box } from "@mui/material";
+import { Container, Grid, Box, Typography } from "@mui/material";
 import CustomTextField from "../../../components/TextField/Custom_TextField";
 import CustomText from "../../../components/Typography/CustomText";
 import CustomButton from "../../../components/Button/CustomButton";
 import { MenuBookOutlined } from "@mui/icons-material";
 import Logo from "../../../components/Typography/Logo";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispacth, useAppSelector } from "../../../app/hooks";
 import { useState } from "react";
 import { loginUser } from "../authActions";
@@ -24,7 +24,8 @@ export default function LoginPage() {
 
   const { email, password } = useAppSelector((state) => state.auth);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -37,17 +38,23 @@ export default function LoginPage() {
     if (result.success) {
       // If validation succeeds, dispatch the action
       try {
+        setLoading(true);
         const response = await dispatch(
           loginUser({ email, password })
         ).unwrap();
         console.log({ resp: response.message, code: response.statusCode });
         if (response.statusCode === 200) {
           localStorage.setItem("token", response.token);
+          setLoading(false);
           navigate("/");
+        } else {
+          setErrorMessage(response.message);
+          setLoading(false);
         }
         setErrors({});
       } catch (error) {
         console.log({ error });
+        setLoading(false);
       }
 
       // Clear errors on successful submission
@@ -106,6 +113,16 @@ export default function LoginPage() {
               mb={2}
               color="#555"
             />
+            {errorMessage ? (
+              <CustomText
+                text={errorMessage as string}
+                fontSize={18}
+                color="red"
+                fontWeight={200}
+              />
+            ) : (
+              <></>
+            )}
             <form onSubmit={handleSubmit}>
               <CustomTextField
                 placeholder="john@gmail.com"
@@ -132,12 +149,15 @@ export default function LoginPage() {
                 }}
               />
               <CustomButton
-                text="Sign In"
+                text={loading ? "Please wait..." : "Sign In"}
                 variant="contained"
                 mt={4}
                 bgColor="#00ABFF"
               />
             </form>
+            <Typography mt={3}>
+              <Link to={"/signup"}> Create account instead.</Link>
+            </Typography>
           </Grid>
         </Grid>
       </Container>

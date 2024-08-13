@@ -1,11 +1,18 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  getUserSuccess,
+  logoutSucces,
   //   getUserSuccess,
   //   logoutSucces,
   requestFailure,
   requestStart,
 } from "./authSlice";
-import { login, registerAsOwner } from "../../utils/apitUtils";
+import {
+  getCurrentUser,
+  login,
+  logout,
+  registerAsOwner,
+} from "../../utils/apitUtils";
 import { User } from "../../types/userTypes";
 import { LoginPayload } from "../../types/authTypes";
 
@@ -41,19 +48,38 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// export const logoutUser = createAsyncThunk(
-//   "users/logoutUser",
-//   async (_, { dispatch }) => {
-//     try {
-//       // dispatch(requestStart());
-//       // localStorage.removeItem("token");
-//       // navigate("/login");
-//       await logout();
-//       dispatch(logoutSucces());
-//       localStorage.removeItem("token");
-//       navigate("/login");
-//     } catch (error) {
-//       dispatch(requestFailure((error as string).toString()));
-//     }
-//   }
-// );
+export const logoutUser = createAsyncThunk(
+  "users/logoutUser",
+  async (_, { dispatch }) => {
+    try {
+      dispatch(requestStart());
+      await logout();
+      dispatch(logoutSucces());
+      localStorage.removeItem("token");
+    } catch (error) {
+      dispatch(requestFailure((error as string).toString()));
+    }
+  }
+);
+
+export const fetchUser = createAsyncThunk(
+  "users/fetchUser",
+  async (_, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await getCurrentUser();
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(getUserSuccess(response.data));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch user";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);

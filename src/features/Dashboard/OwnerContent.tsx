@@ -15,15 +15,11 @@ import DashboardCard from "../../components/Card/DashboardCard";
 
 import { Upload } from "@mui/icons-material";
 import RevenueChart from "./RevenueChart";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddBookForm from "../Book/AddBookForm";
-
-// Sample data for the table
-const todayRentData = [
-  { bookName: "Book A", customerName: "John Doe", quantity: 3 },
-  { bookName: "Book B", customerName: "Jane Smith", quantity: 2 },
-  { bookName: "Book C", customerName: "Alice Johnson", quantity: 1 },
-];
+import { fetchOwnerRents } from "../Rent/rentAction";
+import { fetchOwnerBooks } from "../Book/bookActions";
+import { useAppDispacth, useAppSelector } from "../../app/hooks";
 
 export default function OwnerContent() {
   const [open, setOpen] = useState(false);
@@ -32,7 +28,26 @@ export default function OwnerContent() {
 
     setOpen(true);
   }
+  const dispatch = useAppDispacth();
+  useEffect(() => {
+    dispatch(fetchOwnerRents());
+    dispatch(fetchOwnerBooks());
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const { user } = useAppSelector((state) => state.users);
+  const { ownerBooks } = useAppSelector((state) => state.books);
+  const { ownerRents } = useAppSelector((state) => state.rents);
+  const today = new Date();
+  const todayString = today.toISOString().split("T")[0];
+
+  // Filter rents where createdAt is today
+  const filteredRents = ownerRents.filter((rent) => {
+    // Convert createdAt to Date object and format to YYYY-MM-DD
+    const rentDate = new Date(rent.createdAt);
+    const rentDateString = rentDate.toISOString().split("T")[0];
+    return rentDateString === todayString;
+  });
   return (
     <Box p={8}>
       <Box
@@ -53,12 +68,15 @@ export default function OwnerContent() {
       </Box>
 
       <Grid container spacing={5} my={6}>
-        <Grid item md={6} xs={12}>
-          <DashboardCard title="Books" count={56} />
+        <Grid item md={4} xs={12}>
+          <DashboardCard title="Books" count={ownerBooks?.length || 0} />
         </Grid>
 
-        <Grid item md={6} xs={12}>
-          <DashboardCard title="Rents" count={56} />
+        <Grid item md={4} xs={12}>
+          <DashboardCard title="Rents" count={ownerRents?.length || 0} />
+        </Grid>
+        <Grid item md={4} xs={12}>
+          <DashboardCard title="Revenue" count={user?.walletBalance || 0} />
         </Grid>
       </Grid>
 
@@ -76,33 +94,33 @@ export default function OwnerContent() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {todayRentData.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row.bookName}</TableCell>
-                  <TableCell>{row.customerName}</TableCell>
-                  <TableCell>{row.quantity}</TableCell>
+              {filteredRents?.length > 0 ? (
+                filteredRents.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.bookCopy?.book?.book_title}</TableCell>
+                    <TableCell>
+                      {row.renter?.firstName} {row.renter?.lastName}
+                    </TableCell>
+                    <TableCell>{row.quantity}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No data found
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Box>
 
-      {/* Revenue Chart Placeholder */}
       <Box mb={4}>
         <Typography variant="h6" gutterBottom>
           Revenue
         </Typography>
-        {/* <Paper
-          sx={{
-            height: 300,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="body1">Chart Placeholder</Typography>
-        </Paper> */}
+
         <RevenueChart />
       </Box>
       <AddBookForm open={open} setOpen={setOpen} />

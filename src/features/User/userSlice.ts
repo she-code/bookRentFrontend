@@ -3,14 +3,7 @@ import { User, UserStateType } from "../../types/userTypes";
 const initialState: UserStateType = {
   loading: false,
   error: null,
-  user: {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    location: "",
-    password: "",
-  },
+  user: null,
   firstName: "",
   lastName: "",
   password: "",
@@ -28,11 +21,6 @@ const userSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    getUserSuccess(state, action: PayloadAction<User>) {
-      state.loading = false;
-      state.error = null;
-      state.user = action.payload;
-    },
     getCustomersSuccess(state, action: PayloadAction<User[]>) {
       state.loading = false;
       state.error = null;
@@ -50,19 +38,38 @@ const userSlice = createSlice({
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
     },
-    updateOwnerStatusSuccess(
+    updateOwnerApprovalSuccess(
       state,
-      action: PayloadAction<{ id: number; status: string }>
+      action: PayloadAction<{ id: number; owner: User }>
     ) {
       state.loading = false;
       state.error = null;
-      const { id, status } = action.payload;
+      const { id, owner } = action.payload;
       const user = state.ownerRequests.find((o) => o.id === id);
       if (user) {
-        user.status = status;
+        user.status = owner.status;
+        user.isApproved = owner.isApproved;
+        user.userType = owner.userType;
         state.ownerRequests = state.ownerRequests.filter(
           (book) => book.id !== action.payload.id
         );
+      }
+    },
+
+    updateOwnerStatusSuccess(
+      state,
+      action: PayloadAction<{ id: number; owner: User }>
+    ) {
+      state.loading = false;
+      state.error = null;
+      const { id, owner } = action.payload;
+
+      // Find the index of the owner to be updated
+      const ownerIndex = state.owners.findIndex((o) => o.id === id);
+
+      // If the owner is found, update it
+      if (ownerIndex !== -1) {
+        state.owners[ownerIndex] = owner;
       }
     },
     getOwnerRequestsSuccess(state, action: PayloadAction<User[]>) {
@@ -83,12 +90,12 @@ const userSlice = createSlice({
 export default userSlice.reducer;
 
 export const {
-  getUserSuccess,
   requestFailure,
   requestStart,
   getOwnerRequestsSuccess,
   getOwnersSuccess,
   updateOwnerStatusSuccess,
+  updateOwnerApprovalSuccess,
   addOwner,
   getCustomersSuccess,
 } = userSlice.actions;

@@ -11,6 +11,8 @@ import CheckoutPage from "../features/Book/CheckoutPage";
 import ProtectedRoute from "./ProtectedRoute";
 import RedirectWrapper from "./RedirectWrapper";
 import BookDetailsPage from "../features/Book/BookDetailsPage";
+import CategoryFilteredPage from "../features/Category/CategoryFilteredPage";
+import RentsPage from "../features/Rent/RentsPage";
 const router = createBrowserRouter([
   { path: "/", element: <HomePage /> },
   { path: "/login", element: <RedirectWrapper element={<LoginPage />} /> },
@@ -19,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/bookRent/:id",
     element: <ProtectedRoute children={<CheckoutPage />} />,
+  },
+  {
+    path: "/category/:id",
+    element: <CategoryFilteredPage />,
   },
   {
     path: "/dashboard",
@@ -37,8 +43,12 @@ const router = createBrowserRouter([
     element: <ProtectedRoute children={<CustomersPage />} />,
   },
   {
+    path: "/rents",
+    element: <ProtectedRoute children={<RentsPage />} />,
+  },
+  {
     path: "/bookDetails/:id",
-    element: <ProtectedRoute children={<BookDetailsPage />} />,
+    element: <BookDetailsPage />,
   },
 ]);
 export default router;

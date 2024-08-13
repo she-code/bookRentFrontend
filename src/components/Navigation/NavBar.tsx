@@ -16,7 +16,8 @@ import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchCategories } from "../../features/Category/categoryActions";
 import LinkButton from "../Button/LinkButton";
 import CustomButton from "../Button/CustomButton";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { fetchUser, logoutUser } from "../../features/Auth/authActions";
 
 const NavBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -32,13 +33,17 @@ const NavBar: React.FC = () => {
 
   const dispatch = useAppDispacth();
   const { categories } = useAppSelector((state) => state.categories);
-  const { user } = useAppSelector((state) => state.users);
+  const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   useEffect(() => {
     dispatch(fetchCategories());
+    dispatch(fetchUser());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  function handleLogout(): void {
+    dispatch(logoutUser());
+    navigate("/");
+  }
   return (
     <AppBar
       position="static"
@@ -58,9 +63,11 @@ const NavBar: React.FC = () => {
               // justifyContent: "space-evely",
             }}
           >
-            <Box mr={3}>
-              <Logo my={2} />
-            </Box>
+            <Link to="/" style={{ textDecoration: "none" }}>
+              <Box mr={3}>
+                <Logo my={2} />
+              </Box>
+            </Link>
 
             <IconButton
               edge="start"
@@ -76,9 +83,15 @@ const NavBar: React.FC = () => {
             </IconButton>
             <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
               {categories?.map((category) => (
-                <MenuItem onClick={handleMenuClose} key={category.id}>
-                  {category.category_name}
-                </MenuItem>
+                <Link
+                  to={`/category/${category.id}`}
+                  style={{ textDecoration: "none" }}
+                  key={category.id}
+                >
+                  <MenuItem onClick={handleMenuClose}>
+                    {category.category_name}
+                  </MenuItem>
+                </Link>
               ))}
             </Menu>
           </Box>
@@ -99,25 +112,41 @@ const NavBar: React.FC = () => {
             />
           </Box>
 
-          {/* Right Section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {user ? (
-              user.userType == "customer" ? (
-                <LinkButton to="/requestToBeOwner" text="Become Book Owner" />
-              ) : (
-                <>
-                  {" "}
-                  <CustomButton
-                    text="Dashboard"
-                    bgColor={"#171B36"}
-                    variant="contained"
-                    handleClick={() => navigate("/dashboard")}
-                  />
-                </>
-              )
+              <>
+                {" "}
+                <CustomButton
+                  text="Logout"
+                  handleClick={handleLogout}
+                  variant="contained"
+                  bgColor={"primary"}
+                  mr={4}
+                />
+                {user.userType == "customer" ? (
+                  <></>
+                ) : (
+                  <>
+                    {" "}
+                    <CustomButton
+                      text="Dashboard"
+                      bgColor={"#171B36"}
+                      variant="contained"
+                      handleClick={() => navigate("/dashboard")}
+                    />
+                  </>
+                )}
+              </>
             ) : (
               <>
-                <LinkButton to="/login" text="Sign in" />
+                <CustomButton
+                  mr={4}
+                  text="Sign In"
+                  bgColor={"primary"}
+                  variant="contained"
+                  handleClick={() => navigate("/login")}
+                />{" "}
+                <LinkButton to="/signup" text="Register As Owner" width={400} />
               </>
             )}
           </Box>

@@ -10,8 +10,9 @@ import { Box } from "@mui/material";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import {
   fetchOwnerRequests,
-  updateOwnerStatusThunk,
+  updateOwnerApprovalThunk,
 } from "../User/userActions";
+import CustomText from "../../components/Typography/CustomText";
 // import { citiesList, data, type Person, usStateList } from "./makeData";
 
 const OwnerRequests = () => {
@@ -19,41 +20,40 @@ const OwnerRequests = () => {
   const { ownerRequests } = useAppSelector((state) => state.users);
   useEffect(() => {
     dispatch(fetchOwnerRequests());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch]);
 
   function handleApprove(id: number | undefined): void {
     if (id !== undefined) {
-      dispatch(updateOwnerStatusThunk({ id, status: "approved" }));
+      dispatch(updateOwnerApprovalThunk({ id, action: "approve" }));
     }
   }
 
   function handleReject(id: number | undefined): void {
     if (id !== undefined) {
-      dispatch(updateOwnerStatusThunk({ id, status: "rejected" }));
+      dispatch(updateOwnerApprovalThunk({ id, action: "reject" }));
     }
   }
   const columns: MRT_ColumnDef<User>[] = [
     {
       accessorKey: "firstName",
       header: "First Name",
-      size: 200,
+      size: 100,
     },
     {
       accessorKey: "lastName",
       header: "Last Name",
-      size: 200,
+      size: 100,
     },
     {
       accessorKey: "email",
       header: "Email",
-      size: 250,
+      size: 100,
       enableColumnFilter: false,
     },
     {
       accessorKey: "createdAt",
       header: "Registered At",
-      size: 150,
+      size: 100,
       Cell: ({ cell }) => {
         const date = new Date(cell.getValue() as string); // Convert the value to a Date object
         return date.toLocaleDateString(); // Format as a locale-specific date string
@@ -62,19 +62,20 @@ const OwnerRequests = () => {
     {
       accessorKey: "location",
       header: "Location",
-      size: 150,
+      size: 100,
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      size: 100,
+      enableColumnFilter: false,
     },
     {
       accessorKey: "phoneNumber",
       header: "Phone Number",
-      size: 150,
+      size: 100,
     },
-    {
-      accessorKey: "requestStatus",
-      header: "Request Status",
-      size: 150,
-      enableColumnFilter: false,
-    },
+
     {
       accessorKey: "actions",
       header: "Actions",
@@ -104,12 +105,19 @@ const OwnerRequests = () => {
   ];
   const table = useMaterialReactTable<User>({
     columns,
-    data: ownerRequests,
+    data: ownerRequests?.length > 0 ? ownerRequests : [],
     initialState: { showColumnFilters: true },
   });
 
   return (
-    <Box width={"95%"} mt={4}>
+    <Box mt={4} width={"90%"}>
+      <CustomText
+        text="Owner Requests"
+        fontSize={24}
+        fontWeight={500}
+        mb={3}
+        mt={3}
+      />
       <MaterialReactTable table={table} />
     </Box>
   );

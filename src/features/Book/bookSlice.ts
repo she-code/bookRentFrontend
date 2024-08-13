@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Book, BookStateType } from "../../types/bookTypes";
+import { Book, BookCopy, BookStateType } from "../../types/bookTypes";
 
 const initialState: BookStateType = {
   loading: false,
@@ -14,12 +14,17 @@ const initialState: BookStateType = {
   book_title: "",
   author: "",
   description: "",
-  rent_amount: 0,
+  condition: "",
+
+  rentalPrice: 0,
   status: "",
   quantity: 0,
   approvedBooks: [],
   requestedBooks: [],
   ownerBooks: [],
+  bookCopy: {
+    quantity: 0,
+  },
 };
 
 const bookSlice = createSlice({
@@ -31,18 +36,23 @@ const bookSlice = createSlice({
       state.error = null;
       state.book = action.payload;
     },
+    getBookCopySuccess(state, action: PayloadAction<Book>) {
+      state.loading = false;
+      state.error = null;
+      state.bookCopy = action.payload;
+    },
     addBookSuccess(state, action: PayloadAction<Book>) {
       state.loading = false;
       state.error = null;
       state.ownerBooks = [...state.ownerBooks, action.payload];
     },
 
-    updateBookSuccess(state, action: PayloadAction<Book>) {
+    updateBookSuccess(state, action: PayloadAction<BookCopy>) {
       state.loading = false;
       state.error = null;
 
       const index = state.ownerBooks.findIndex(
-        (b: Book) => b.id === action.payload.id
+        (b: BookCopy) => b.id === action.payload.id
       );
 
       if (index !== -1) {
@@ -51,21 +61,21 @@ const bookSlice = createSlice({
         state.ownerBooks.push(action.payload);
       }
 
-      state.book = action.payload;
+      state.bookCopy = action.payload;
     },
     updateBookAvailability(state, action: PayloadAction<string>) {
-      if (state.book) {
-        state.book.bookAvailability = action.payload;
+      if (state.bookCopy) {
+        state.bookCopy.availability = action.payload;
       }
     },
     updateBookQuantity(state, action: PayloadAction<number>) {
-      if (state.book) {
-        state.book.quantity = action.payload;
+      if (state.bookCopy) {
+        state.bookCopy.quantity = action.payload;
       }
     },
     updateRentAmount(state, action: PayloadAction<number>) {
-      if (state.book) {
-        state.book.rent_amount = action.payload;
+      if (state.bookCopy) {
+        state.bookCopy.rentalPrice = action.payload;
       }
     },
     getBooksSuccess(state, action: PayloadAction<Book[]>) {
@@ -88,19 +98,23 @@ const bookSlice = createSlice({
       state.error = null;
       state.requestedBooks = action.payload;
     },
-    updateBookStatusSuccess(
-      state,
-      action: PayloadAction<{ id: number; status: string }>
-    ) {
+    removeBookSuccess(state, action: PayloadAction<number>) {
       state.loading = false;
       state.error = null;
-      const { id, status } = action.payload;
-      const book = state.requestedBooks.find((b: Book) => b.id === id);
+      // Filter out the deleted book and assign the new array to state.ownerBooks
+      state.ownerBooks = state.ownerBooks.filter(
+        (book) => book.id !== action.payload
+      );
+    },
+    updateBookStatusSuccess(state, action: PayloadAction<{ id: number }>) {
+      state.loading = false;
+      state.error = null;
+      const { id } = action.payload;
+      const book = state.requestedBooks.find((b: BookCopy) => b?.id === id);
       console.log({ book });
       if (book) {
-        book.status = status;
         state.requestedBooks = state.requestedBooks.filter(
-          (book: Book) => book.id !== action.payload.id
+          (book: BookCopy) => book.id !== action.payload.id
         );
       }
     },
@@ -124,14 +138,27 @@ const bookSlice = createSlice({
     setDescription(state, action: PayloadAction<string>) {
       state.description = action.payload;
     },
+    setCondition(state, action: PayloadAction<string>) {
+      state.condition = action.payload;
+    },
     setRentAmount(state, action: PayloadAction<number>) {
-      state.rent_amount = action.payload;
+      state.rentalPrice = action.payload;
     },
     setCategoryId(state, action: PayloadAction<number>) {
       state.categoryId = action.payload;
     },
     setBookAvailability(state, action: PayloadAction<string>) {
-      state.bookAvailability = action.payload;
+      state.availability = action.payload;
+    },
+    clearBookFields(state) {
+      state.availability = "";
+      state.book_title = "";
+      state.rentalPrice = 0;
+      state.condition = "";
+      state.categoryId = 0;
+      state.author = "";
+      state.description = "";
+      state.quantity = 0;
     },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
@@ -145,6 +172,7 @@ export const {
   addBookSuccess,
   updateBookSuccess,
   getBooksSuccess,
+  getBookCopySuccess,
   updateBookAvailability,
   getOwnerBooksSuccess,
   getApprovedBooksSuccess,
@@ -158,8 +186,11 @@ export const {
   setAuthor,
   setQuantity,
   setDescription,
+  setCondition,
   getRequestedBooksSuccess,
   updateBookStatusSuccess,
   updateBookQuantity,
+  clearBookFields,
   updateRentAmount,
+  removeBookSuccess,
 } = bookSlice.actions;

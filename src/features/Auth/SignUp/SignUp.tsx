@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Button } from "@mui/material";
+import { Box, Container, Grid, Typography } from "@mui/material";
 import { MenuBookOutlined } from "@mui/icons-material";
 import Logo from "../../../components/Typography/Logo";
 // import { useForm, Controller } from "react-hook-form";
@@ -19,6 +19,8 @@ import {
 } from "../authSlice";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import CustomButton from "../../../components/Button/CustomButton";
 
 export default function SignUpPage() {
   const schema = z
@@ -45,7 +47,6 @@ export default function SignUpPage() {
   const {
     firstName,
     lastName,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     location,
     email,
     password,
@@ -53,7 +54,8 @@ export default function SignUpPage() {
     phoneNumber,
   } = useAppSelector((state) => state.auth);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -64,18 +66,20 @@ export default function SignUpPage() {
       email,
       password,
       confpassword: confPassword,
-      location: "chennai",
+      location,
       phoneNumber,
     });
 
     if (result.success) {
       // If validation succeeds, dispatch the action
       try {
+        setLoading(true);
+
         const response = await dispatch(
           signUpUser({
             firstName,
             lastName,
-            location: "chennai",
+            location,
             email,
             password,
             confPassword,
@@ -86,10 +90,14 @@ export default function SignUpPage() {
         if (response.statusCode === 200) {
           localStorage.setItem("token", response.token);
           navigate("/");
+        } else {
+          setErrorMessage(response.message);
+          setLoading(false);
         }
         setErrors({});
       } catch (error) {
         console.log({ error });
+        setLoading(false);
       }
 
       // Clear errors on successful submission
@@ -148,6 +156,16 @@ export default function SignUpPage() {
               mb={2}
               color="#555"
             />
+            {errorMessage ? (
+              <CustomText
+                text={errorMessage as string}
+                fontSize={18}
+                color="red"
+                fontWeight={200}
+              />
+            ) : (
+              <></>
+            )}
             <form onSubmit={handleSubmit}>
               <CustomTextField
                 placeholder="John"
@@ -166,8 +184,8 @@ export default function SignUpPage() {
                 placeholder="Doe"
                 label="Last Name"
                 type="text"
-                // error={!!errors.lastName}
-                // helperText={errors.lastName?.message as string}
+                error={!!errors.lastName}
+                helperText={errors.lastName as string}
                 name={"lastName"}
                 value={lastName}
                 handleInputChangeCB={(e) => {
@@ -192,8 +210,8 @@ export default function SignUpPage() {
                 placeholder="********"
                 label="Password"
                 type="password"
-                // error={!!errors.password}
-                // helperText={errors.password?.message as string}
+                error={!!errors.password}
+                helperText={errors.password as string}
                 name={"password"}
                 value={password}
                 handleInputChangeCB={(e) => {
@@ -205,8 +223,8 @@ export default function SignUpPage() {
                 placeholder="********"
                 label="Confirm Password"
                 type="password"
-                // error={!!errors.confpassword}
-                // helperText={errors.confpassword?.message as string}
+                error={!!errors.confpassword}
+                helperText={errors.confpassword as string}
                 name={"confPassword"}
                 value={confPassword as string}
                 handleInputChangeCB={(e) => {
@@ -218,36 +236,35 @@ export default function SignUpPage() {
                 placeholder=""
                 label="Location"
                 type="text"
-                //  error={!!errors.location}
-                //   helper Text={errors.location?.message as string}
+                error={!!errors.location}
+                helperText={errors.location as string}
                 name={"location"}
-                value={"location"}
+                value={location as string}
                 handleInputChangeCB={(e) => {
-                  setLocation(e.target.value);
+                  dispatch(setLocation(e.target.value));
                 }}
               />
-
               <CustomTextField
                 placeholder="09********"
                 label="Phone Number"
                 type="tel"
-                // error={!!errors.phoneNumber}
-                // helperText={errors.phoneNumber?.message as string}
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber as string}
                 name={"phoneNumber"}
                 value={phoneNumber}
                 handleInputChangeCB={(e) => {
                   dispatch(setPhoneNumber(e.target.value));
                 }}
               />
-              <Button
+              <CustomButton
+                text={loading ? "Please wait..." : "Sign Up"}
                 variant="contained"
-                color="primary"
-                type="submit"
-                // onClick={handleSubmit(onSubmit)}
-                sx={{ mt: 4, bgcolor: "#00ABFF" }}
-              >
-                Sign Up
-              </Button>
+                mt={4}
+                bgColor="#00ABFF"
+              />
+              <Typography mt={3}>
+                Already have an account? <Link to={"/login"}>Login</Link>
+              </Typography>
             </form>
           </Grid>
         </Grid>

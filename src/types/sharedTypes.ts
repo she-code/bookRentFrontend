@@ -16,10 +16,20 @@ export type RegisterBookParams = {
   book_title: string;
   author: string;
   quantity: number;
-  bookAvailability: string;
-  rent_amount: number;
+  availability: string;
+  condition: string;
+
+  rentalPrice: number;
   categoryId: number;
   image: File;
   file: File;
   description: string;
+};
+
+export type AddRentParams = {
+  bookId: number;
+  ownerId: number;
+  quantity: number;
+  totalAmount: number;
+  bookCopyId: number;
 };

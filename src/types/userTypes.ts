@@ -11,6 +11,9 @@ export type User = {
   location: string;
   confPassword?: string;
   createdAt?: string;
+  isApproved?: boolean;
+  isDisabled?: boolean;
+  walletBalance?: number;
 };
 
 export type UserStateType = {

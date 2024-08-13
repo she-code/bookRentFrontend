@@ -1,6 +1,7 @@
 import { API_ENDPOINT } from "../config/constants";
 import { Book } from "../types/bookTypes";
-import { RegisterBookParams } from "../types/sharedTypes";
+import { Rent } from "../types/rentType";
+import { AddRentParams, RegisterBookParams } from "../types/sharedTypes";
 import { User } from "../types/userTypes";
 
 const API_BASE_URL = API_ENDPOINT;
@@ -12,6 +13,8 @@ type RequestData =
   | User
   | Book
   | RegisterBookParams
+  | Rent
+  | AddRentParams
   // eslint-disable-next-line @typescript-eslint/ban-types
   | {};
 
@@ -79,7 +82,9 @@ export const login = (email: string, password: string) => {
 export const registerAsOwner = (user: User) => {
   return request("auth/registerAsOwner", "POST", user);
 };
-
+export const logout = () => {
+  return request("auth/logout", "POST", {});
+};
 export const getAllOwners = () => {
   return request("users/getAllOwners", "GET", {});
 };
@@ -92,8 +97,11 @@ export const getAllCustomers = () => {
 export const getOwnerRequests = () => {
   return request("users/getOwnerRequests", "GET", {});
 };
-export const updateOwnertatus = (id: number, userStatus: string) => {
-  return request(`users/updateOwnerStatus/${id}`, "PUT", { userStatus });
+export const updateOwnerApproval = (id: number, action: string) => {
+  return request(`users/${id}/approval`, "PATCH", { action });
+};
+export const updateOwnerStatus = (id: number, isDisabled: boolean) => {
+  return request(`users/updateOwnerStatus/${id}`, "PATCH", { isDisabled });
 };
 
 /*** BOOK APIS */
@@ -105,19 +113,19 @@ export const getAllBooks = () => {
   return request("books/getAllBooks", "GET", {});
 };
 
-export const updateBookStatus = (id: number, bookStatus: string) => {
-  return request(`books/updateBookStatus/${id}`, "PUT", { bookStatus });
+export const updateBookStatus = (id: number, action: string) => {
+  return request(`books/updateBookStatus/${id}`, "PATCH", { action });
 };
 export const updateBookApi = (
   id: number,
-  rent_amount: number,
+  rentalPrice: number,
   quantity: number,
-  bookAvailability: string
+  availability: string
 ) => {
   return request(`books/${id}`, "PUT", {
-    rent_amount,
+    rentalPrice,
     quantity,
-    bookAvailability,
+    availability,
   });
 };
 export const getApprovedBooks = () => {
@@ -129,11 +137,33 @@ export const getOwnerBooks = () => {
 export const getBook = (id: number) => {
   return request(`books/${id}`, "GET", {});
 };
-
+export const getBookCopy = (id: number) => {
+  return request(`books/bookCopies/${id}`, "GET", {});
+};
+export const getBookCopyEdit = (id: number) => {
+  return request(`books/bookCopiesEdit/${id}`, "GET", {});
+};
 export const addBook = (book: RegisterBookParams) => {
   return request(`books/addBook`, "POST", { book });
 };
+export const deleteBookAPI = (id: number) => {
+  return request(`books/${id}`, "DELETE", {});
+};
+
 /********* Categories API***/
 export const getCategories = () => {
   return request("categories/getCategories", "GET", {});
+};
+
+/******** Rent */
+export const addRentAPI = (rent: AddRentParams) => {
+  return request(`rents/rentBook`, "POST", rent);
+};
+
+export const getOwnerRents = () => {
+  return request("rents/getOwnerRents", "GET", {});
+};
+
+export const getRents = () => {
+  return request("rents/getRents", "GET", {});
 };

@@ -7,8 +7,9 @@ import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { Dialog, DialogContent } from "@mui/material";
 import CustomSelect from "../../components/DropDown/CustomSelect";
 import { fetchCategories } from "../Category/categoryActions";
-import { fetchBook, updateBook } from "./bookActions";
+import { fetchBookCopyEdit, updateBook } from "./bookActions";
 import {
+  clearBookFields,
   setLoading,
   updateBookAvailability,
   updateBookQuantity,
@@ -40,11 +41,11 @@ export default function EditBookForm(props: {
     }
   };
   const { categories } = useAppSelector((state) => state.categories);
-  const { book } = useAppSelector((state) => state.books);
+  const { bookCopy } = useAppSelector((state) => state.books);
   const currentAvailability = mapBookAvailability(
-    book?.bookAvailability as string
+    bookCopy?.availability as string
   );
-  const currentCategory = book?.Category?.id as number;
+  const currentCategory = bookCopy?.book?.Category?.id as number;
 
   const availabilityOptions = [
     { label: "Available", value: "available" },
@@ -62,10 +63,10 @@ export default function EditBookForm(props: {
     // Dispatch the updateBook thunk
     const resultAction = await dispatch(
       updateBook({
-        id: book?.id as number,
-        rent_amount: book?.rent_amount as number,
-        quantity: book?.quantity as number,
-        bookAvailability: book?.bookAvailability as string,
+        id: bookCopy?.id as number,
+        rentalPrice: bookCopy?.rentalPrice as number,
+        quantity: bookCopy?.quantity as number,
+        availability: bookCopy?.availability as string,
       })
     );
 
@@ -74,6 +75,7 @@ export default function EditBookForm(props: {
       const response = resultAction.payload;
       if (response.statusCode === 200) {
         dispatch(updateBookSuccess(response.data));
+        dispatch(clearBookFields());
         setOpen(false);
       } else {
         console.error("Failed to update book:", response.message);
@@ -87,7 +89,7 @@ export default function EditBookForm(props: {
   useEffect(() => {
     const fetchBookData = async () => {
       try {
-        await dispatch(fetchBook(bookId));
+        await dispatch(fetchBookCopyEdit(bookId));
       } catch (error) {
         console.error("Error fetching book:", error);
       } finally {
@@ -116,7 +118,7 @@ export default function EditBookForm(props: {
             //   error={!!errors.book_title}
             //   helperText={errors.book_title}
             name={"book_title"}
-            value={book?.book_title as string}
+            value={bookCopy?.book?.book_title as string}
             handleInputChangeCB={() => {}}
           />
           <CustomTextField
@@ -127,7 +129,7 @@ export default function EditBookForm(props: {
             //   error={!!errors.author}
             //   helperText={errors.author as string}
             name={"author"}
-            value={book?.author as string}
+            value={bookCopy?.book?.author as string}
             handleInputChangeCB={() => {}}
           />
           <CustomTextField
@@ -137,7 +139,7 @@ export default function EditBookForm(props: {
             //   error={!!errors.quantity}
             //   helperText={errors.quantity as string}
             name={"quantity"}
-            value={book?.quantity.toString() as string}
+            value={bookCopy?.quantity.toString() as string}
             handleInputChangeCB={(e) => {
               dispatch(updateBookQuantity(Number(e.target.value)));
             }}
@@ -149,7 +151,7 @@ export default function EditBookForm(props: {
             //   error={!!errors.rent_amount}
             //   helperText={errors.rent_amount as string}
             name={"rent_amount"}
-            value={book?.rent_amount?.toString() as string}
+            value={bookCopy?.rentalPrice?.toString() as string}
             handleInputChangeCB={(e) => {
               dispatch(updateRentAmount(Number(e.target.value)));
             }}

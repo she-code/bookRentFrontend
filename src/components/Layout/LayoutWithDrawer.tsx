@@ -10,25 +10,30 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import MenuIcon from "@mui/icons-material/Menu";
 import SideBar from "../../components/SideBar/SideBar";
 import { useState, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispacth } from "../../app/hooks";
+import { logoutUser } from "../../features/Auth/authActions";
+import CustomButton from "../Button/CustomButton";
 
 const drawerWidth = 240;
 
-const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
-  open?: boolean;
-}>(({ theme, open }) => ({
+const Main = styled("main", {
+  shouldForwardProp: (prop) => prop !== "open",
+})<{ open?: boolean }>(({ theme, open }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
-  transition: theme.transitions.create("margin", {
+  transition: theme.transitions.create(["margin", "padding"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   marginLeft: `-${drawerWidth}px`,
   ...(open && {
-    transition: theme.transitions.create("margin", {
+    transition: theme.transitions.create(["margin", "padding"], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginLeft: 0,
+    // paddingRight: open ? drawerWidth : 0,
   }),
 }));
 
@@ -71,10 +76,16 @@ export default function LayoutWithDrawer(props: LayoutWithDrawerProps) {
   const handleDrawerOpen = () => {
     setOpen(true);
   };
+  const navigate = useNavigate();
   const { children, title } = props;
+  const dispatch = useAppDispacth();
+  function handleLogout(): void {
+    dispatch(logoutUser());
+    navigate("/");
+  }
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", paddingRight: 8 }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -87,9 +98,22 @@ export default function LayoutWithDrawer(props: LayoutWithDrawerProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {title}
-          </Typography>
+          <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
+            <Typography variant="h6" noWrap component="div">
+              {title}
+            </Typography>
+          </Box>
+          <Box width={100}>
+            {" "}
+            <CustomButton
+              text="Logout"
+              handleClick={handleLogout}
+              variant="contained"
+              bgColor={"#171B36"}
+              textColor="white"
+              mr={4}
+            />
+          </Box>
         </Toolbar>
       </AppBar>
       <SideBar open={open} setOpen={setOpen} />

@@ -32,8 +32,8 @@ export default function CustomersPage() {
     {
       accessorKey: "email",
       header: "Email",
-      size: 250,
-      enableColumnFilter: false,
+      size: 200,
+      enableColumnFilter: true,
     },
     {
       accessorKey: "createdAt",
@@ -55,15 +55,15 @@ export default function CustomersPage() {
       size: 150,
     },
     {
-      accessorKey: "requestStatus",
-      header: "Request Status",
+      accessorKey: "status",
+      header: "Status",
       size: 150,
       enableColumnFilter: false,
     },
   ];
   const table = useMaterialReactTable<User>({
     columns,
-    data: customers,
+    data: customers ?? [],
     initialState: { showColumnFilters: true },
   });
 

@@ -1,18 +1,23 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getApprovedBooksSuccess,
+  getBookCopySuccess,
   getBooksSuccess,
   getBookSuccess,
   getOwnerBooksSuccess,
   getRequestedBooksSuccess,
+  removeBookSuccess,
   requestFailure,
   requestStart,
   updateBookStatusSuccess,
 } from "./bookSlice";
 import { Book } from "../../types/bookTypes";
 import {
+  deleteBookAPI,
   getAllBooks,
   getBook,
+  getBookCopy,
+  getBookCopyEdit,
   getBookRequests,
   getOwnerBooks,
   getApprovedBooks as gp,
@@ -71,11 +76,7 @@ export const updateBookStatusThunk = createAsyncThunk(
       console.log({ response });
       // Check the response status
       if (response.statusCode === 200) {
-        // Adjust based on your API response
-        // Dispatch success action
-        dispatch(
-          updateBookStatusSuccess({ id: payload.id, status: payload.status })
-        );
+        dispatch(updateBookStatusSuccess({ id: payload.id }));
       } else {
         // Handle specific response errors
         const errorMessage =
@@ -83,7 +84,6 @@ export const updateBookStatusThunk = createAsyncThunk(
         dispatch(requestFailure(errorMessage));
       }
     } catch (error) {
-      // Handle network or other errors
       dispatch(requestFailure((error as Error).message));
     }
   }
@@ -132,7 +132,48 @@ export const fetchBook = createAsyncThunk(
     }
   }
 );
+export const fetchBookCopy = createAsyncThunk(
+  "books/fetchBookCopy",
+  async (id: number, { dispatch }) => {
+    dispatch(requestStart());
 
+    try {
+      const response = await getBookCopy(id);
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(getBookCopySuccess(response.data));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch books";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
+export const fetchBookCopyEdit = createAsyncThunk(
+  "books/fetchBookCopyEdit",
+  async (id: number, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await getBookCopyEdit(id);
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(getBookCopySuccess(response.data));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch book";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
 export const fetchOwnerBooks = createAsyncThunk(
   "books/fetchOwnerBooks",
   async (_, { dispatch }) => {
@@ -154,11 +195,32 @@ export const fetchOwnerBooks = createAsyncThunk(
     }
   }
 );
+export const deleteBook = createAsyncThunk(
+  "books/deleteBook",
+  async (id: number, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await deleteBookAPI(id);
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(removeBookSuccess(id));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch books";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
 
 interface UpdateBookParams {
-  rent_amount: number;
+  rentalPrice: number;
   quantity: number;
-  bookAvailability: string;
+  availability: string;
   id: number;
 }
 export const updateBook = createAsyncThunk(
@@ -167,9 +229,9 @@ export const updateBook = createAsyncThunk(
     try {
       const response = await updateBookApi(
         params.id,
-        params.rent_amount,
+        params.rentalPrice,
         params.quantity,
-        params.bookAvailability
+        params.availability
       );
 
       if (response.statusCode === 200) {
@@ -183,55 +245,6 @@ export const updateBook = createAsyncThunk(
   }
 );
 
-// export const registerBook = createAsyncThunk(
-//   "books/registerBook",
-//   async (book: RegisterBookParams, { rejectWithValue }) => {
-//     try {
-//       const response = await addBook(book);
-
-//     if (response.statusCode === 200) {
-//       return response; // Return the data for successful cases
-//     } else {
-//       return rejectWithValue(response.message || "Unable to add book"); // Reject with an error message
-//     }
-//   } catch (error) {
-//     return rejectWithValue((error as Error).message); // Handle network errors
-//   }
-// }
-// );
-
-// export const registerBook = createAsyncThunk(
-//   "books/registerBook",
-//   async (params: RegisterBookParams, { rejectWithValue }) => {
-//     const formData = new FormData();
-
-//     formData.append("book_title", params.book_title);
-//     formData.append("author", params.author);
-//     formData.append("quantity", params.quantity.toString());
-//     formData.append("bookAvailability", params.bookAvailability);
-//     formData.append("rent_amount", params.rent_amount.toString());
-//     formData.append("categoryId", params.categoryId.toString());
-//     formData.append("image", params.image); // Appending the image file
-//     formData.append("file", params.file); // Appending the PDF file
-//     const API_BASE_URL = API_ENDPOINT;
-
-//     try {
-//       const response = await fetch(`${API_BASE_URL}books/addBook`, {
-//         method: "POST",
-//         body: formData,
-//         credentials: "include",
-//       });
-//       const data = await response.json();
-//       if (data.statusCode === 201) {
-//         return data; // Return the data for successful cases
-//       } else {
-//         return rejectWithValue(data.message || "Unable to add book"); // Reject with an error message
-//       }
-//     } catch (error) {
-//       return rejectWithValue((error as Error).message); // Handle network errors
-//     }
-//   }
-// );
 export const registerBook = createAsyncThunk(
   "books/registerBook",
   async (params: RegisterBookParams) => {
@@ -240,10 +253,11 @@ export const registerBook = createAsyncThunk(
     formData.append("book_title", params.book_title);
     formData.append("author", params.author);
     formData.append("quantity", params.quantity.toString());
-    formData.append("bookAvailability", params.bookAvailability);
+    formData.append("availability", params.availability);
     formData.append("description", params.description);
+    formData.append("rentalPrice", params.rentalPrice.toString());
+    formData.append("condition", params.condition);
 
-    formData.append("rent_amount", params.rent_amount.toString());
     formData.append("categoryId", params.categoryId.toString());
     formData.append("image", params.image);
     formData.append("file", params.file);
@@ -251,7 +265,7 @@ export const registerBook = createAsyncThunk(
     const API_BASE_URL = API_ENDPOINT;
 
     try {
-      const response = await fetch(`${API_BASE_URL}books/addBook`, {
+      const response = await fetch(`${API_BASE_URL}books/uploadBook`, {
         method: "POST",
         body: formData,
         credentials: "include",

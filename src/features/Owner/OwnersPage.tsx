@@ -6,10 +6,11 @@ import {
 import { User } from "../../types/userTypes";
 import { useEffect } from "react";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
-import { fetchOwners } from "../User/userActions";
+import { fetchOwners, updateOwnerStatusThunk } from "../User/userActions";
 import { Box } from "@mui/material";
 
 import LayoutWithDrawer from "../../components/Layout/LayoutWithDrawer";
+import CustomButton from "../../components/Button/CustomButton";
 
 export default function OwnersPage() {
   const dispatch = useAppDispacth();
@@ -18,6 +19,16 @@ export default function OwnersPage() {
     dispatch(fetchOwners());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleOwnerStatus(
+    id: number | undefined,
+    isDisabled: boolean
+  ): void {
+    dispatch(
+      updateOwnerStatusThunk({ id: id as number, isDisabled: isDisabled })
+    );
+  }
+
   const columns: MRT_ColumnDef<User>[] = [
     {
       accessorKey: "firstName",
@@ -58,10 +69,32 @@ export default function OwnersPage() {
       header: "Status",
       size: 150,
     },
+    {
+      accessorKey: "actions",
+      header: "Actions",
+      size: 150,
+      enableColumnFilter: false,
+      enableSorting: false,
+      Cell: ({ row }) => (
+        <CustomButton
+          mr={2}
+          text={(row.original.isDisabled as boolean) ? "Enable" : "Disable"}
+          variant="contained"
+          bgColor={(row.original.isDisabled as boolean) ? "green" : "red"}
+          textColor="white"
+          handleClick={() =>
+            handleOwnerStatus(
+              row.original.id,
+              !row.original.isDisabled as boolean
+            )
+          }
+        />
+      ),
+    },
   ];
   const table = useMaterialReactTable<User>({
     columns,
-    data: owners,
+    data: owners?.length > 0 ? owners : [],
     initialState: { showColumnFilters: true },
   });
 

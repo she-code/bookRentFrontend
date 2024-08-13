@@ -1,16 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStateType } from "../../types/authTypes";
+import { User } from "../../types/userTypes";
 const initialState: AuthStateType = {
   loading: false,
   error: null,
-  user: {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    location: "",
-    password: "",
-  },
+  user: null,
   firstName: "",
   lastName: "",
   password: "",
@@ -27,6 +21,11 @@ const authSlice = createSlice({
     requestStart(state) {
       state.loading = true;
       state.error = null;
+    },
+    getUserSuccess(state, action: PayloadAction<User>) {
+      state.loading = false;
+      state.error = null;
+      state.user = action.payload;
     },
     requestFailure(state, action: PayloadAction<string>) {
       state.loading = false;
@@ -55,9 +54,9 @@ const authSlice = createSlice({
     },
 
     logoutSucces(state) {
-      state.user = null;
       state.loading = false;
       state.error = null;
+      state.user = null;
     },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
@@ -77,6 +76,6 @@ export const {
   setLastName,
   setLocation,
   setPhoneNumber,
-
+  getUserSuccess,
   logoutSucces,
 } = authSlice.actions;

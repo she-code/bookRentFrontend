@@ -3,17 +3,17 @@ import {
   getCustomersSuccess,
   getOwnerRequestsSuccess,
   getOwnersSuccess,
-  getUserSuccess,
   requestFailure,
   requestStart,
+  updateOwnerApprovalSuccess,
   updateOwnerStatusSuccess,
 } from "./userSlice";
 import {
   getAllCustomers,
   getAllOwners,
-  getCurrentUser,
   getOwnerRequests,
-  updateOwnertatus,
+  updateOwnerApproval,
+  updateOwnerStatus,
 } from "../../utils/apitUtils";
 
 export const fetchOwnerRequests = createAsyncThunk(
@@ -31,9 +31,39 @@ export const fetchOwnerRequests = createAsyncThunk(
     }
   }
 );
+interface UpdateOwnerApprovalPayload {
+  id: number;
+  action: string;
+}
+
+export const updateOwnerApprovalThunk = createAsyncThunk(
+  "users/updateOwnerApproval",
+  async (payload: UpdateOwnerApprovalPayload, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await updateOwnerApproval(payload.id, payload.action);
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(
+          updateOwnerApprovalSuccess({ id: payload.id, owner: response.data })
+        );
+      } else {
+        // Handle specific response errors
+        const errorMessage =
+          response.data?.message || "Failed to update owner status";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
+
 interface UpdateOwnerStatusPayload {
   id: number;
-  status: string;
+  isDisabled: boolean;
 }
 
 export const updateOwnerStatusThunk = createAsyncThunk(
@@ -42,11 +72,11 @@ export const updateOwnerStatusThunk = createAsyncThunk(
     dispatch(requestStart());
 
     try {
-      const response = await updateOwnertatus(payload.id, payload.status);
+      const response = await updateOwnerStatus(payload.id, payload.isDisabled);
       console.log({ response });
       if (response.statusCode === 200) {
         dispatch(
-          updateOwnerStatusSuccess({ id: payload.id, status: payload.status })
+          updateOwnerStatusSuccess({ id: payload.id, owner: response.data })
         );
       } else {
         // Handle specific response errors
@@ -95,28 +125,6 @@ export const fetchCustomers = createAsyncThunk(
       } else {
         // Handle specific response errors
         const errorMessage = response.message || "Unable to fetch customers";
-        dispatch(requestFailure(errorMessage));
-      }
-    } catch (error) {
-      // Handle network or other errors
-      dispatch(requestFailure((error as Error).message));
-    }
-  }
-);
-
-export const fetchUser = createAsyncThunk(
-  "users/fetchUser",
-  async (_, { dispatch }) => {
-    dispatch(requestStart());
-
-    try {
-      const response = await getCurrentUser();
-      console.log({ response });
-      if (response.statusCode === 200) {
-        dispatch(getUserSuccess(response.data));
-      } else {
-        // Handle specific response errors
-        const errorMessage = response.message || "Unable to fetch user";
         dispatch(requestFailure(errorMessage));
       }
     } catch (error) {

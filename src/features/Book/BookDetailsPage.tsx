@@ -7,14 +7,16 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Stack,
-  IconButton,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchBook } from "./bookActions";
 import { useNavigate, useParams } from "react-router-dom";
 import { setLoading } from "./bookSlice";
 import CustomButton from "../../components/Button/CustomButton";
+import NavBar from "../../components/Navigation/NavBar";
 
 export default function BookDetailsPage() {
   const dispatch = useAppDispacth();
@@ -79,94 +81,128 @@ export default function BookDetailsPage() {
     );
   }
 
+  const bookImage =
+    book?.copies && book.copies.length > 0
+      ? book.copies[0]?.image
+      : book?.image;
+
+  // Calculate the total available quantity
+  const totalQuantity = book?.copies?.reduce(
+    (sum, copy) => sum + copy.quantity,
+    0
+  );
+
+  // Calculate the price range
+  const rentalPrices = book?.copies?.map((copy) => copy.rentalPrice) || [];
+  const minPrice = Math.min(...(rentalPrices as number[]));
+  const maxPrice = Math.max(...(rentalPrices as number[]));
+  const priceRange =
+    minPrice === maxPrice ? `$${minPrice}` : `$${minPrice} - $${maxPrice}`;
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
-        p: 2,
-      }}
-    >
-      <Container maxWidth="lg">
-        <Grid
-          container
-          spacing={4}
-          sx={{
-            boxShadow: 3,
-            borderRadius: 2,
-            bgcolor: "white",
-            p: 4,
-            mb: 4,
-          }}
-        >
-          {/* Book Image */}
+    <>
+      <NavBar />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          bgcolor: "#f5f5f5",
+          p: 2,
+        }}
+      >
+        <Container maxWidth="lg">
           <Grid
-            item
-            md={6}
-            xs={12}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
+            container
+            spacing={4}
+            sx={{
+              boxShadow: 3,
+              borderRadius: 2,
+              bgcolor: "white",
+              p: 4,
+              mb: 4,
+            }}
           >
-            <Card sx={{ maxWidth: 400 }}>
-              <CardMedia
-                component="img"
-                height="400"
-                image={book?.image || "/default-image.png"}
-                alt={book?.book_title || "Book Image"}
-              />
-            </Card>
-          </Grid>
+            {/* Book Image */}
+            <Grid
+              item
+              md={6}
+              xs={12}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Card sx={{ maxWidth: 400 }}>
+                <CardMedia
+                  component="img"
+                  height="400"
+                  image={bookImage}
+                  alt={book?.book_title || "Book Image"}
+                />
+              </Card>
+            </Grid>
 
-          {/* Book Details */}
-          <Grid item md={6} xs={12}>
-            <Card sx={{ height: "100%" }}>
-              <CardContent>
-                <Typography variant="h4" gutterBottom>
-                  {book?.book_title || "Book Title"}
-                </Typography>
-                <Typography variant="h6" color="text.secondary">
-                  Author: {book?.author || "Unknown"}
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {book?.description || "No description available."}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Available Quantity:</strong> {book?.quantity || 0}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Rent Amount:</strong> $
-                  {book?.rent_amount?.toFixed(2) || "0.00"}
-                </Typography>
-
-                <Typography variant="body1" color="text.secondary">
-                  <strong>Added by:</strong> {book?.User?.firstName || "N/A"}{" "}
-                  {book?.User?.lastName || "N/A"}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  <strong>Category:</strong>{" "}
-                  {book?.Category?.category_name || "N/A"}
-                </Typography>
-                <Stack direction="row" spacing={2} mt={2}>
-                  <CustomButton
-                    variant="contained"
-                    bgColor="primary"
-                    text="Rent This Book"
-                    handleClick={() => navigate(`/bookRent/${book?.id}`)}
-                  />
-                  <IconButton color="primary">
-                    <i className="fas fa-heart"></i>{" "}
-                    {/* Add appropriate icon or component */}
-                  </IconButton>
-                </Stack>
-              </CardContent>
-            </Card>
+            {/* Book Details */}
+            <Grid item md={6} xs={12}>
+              <Card sx={{ height: "100%" }}>
+                <CardContent>
+                  <Typography variant="h4" gutterBottom>
+                    {book?.book_title || "Book Title"}
+                  </Typography>
+                  <Typography variant="h6" color="text.secondary">
+                    Author: {book?.author || "Unknown"}
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {book?.description || "No description available."}
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>Available Quantity:</strong> {totalQuantity || 0}
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>Rent Amount:</strong> {priceRange}
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>Category :</strong> {book?.Category?.category_name}
+                  </Typography>
+                  {/* List of Copies */}
+                  {book?.copies && book.copies.length > 0 && (
+                    <Box mt={4}>
+                      <Typography variant="h6" gutterBottom>
+                        Available Copies
+                      </Typography>
+                      <List>
+                        {book.copies.map((copy) => (
+                          <ListItem key={copy.id}>
+                            <ListItemText
+                              primary={`Price: $${copy.rentalPrice} | Condition: ${copy.condition}`}
+                              secondary={`Location: ${
+                                copy.owner?.location || "N/A"
+                              } | Owner: ${copy.owner?.firstName || "N/A"} ${
+                                copy.owner?.lastName || "N/A"
+                              }`}
+                            />
+                            <CustomButton
+                              variant="contained"
+                              bgColor="primary"
+                              text="Rent This Copy"
+                              handleClick={() =>
+                                navigate(
+                                  `/bookRent/${book?.id}?copyId=${copy.id}`
+                                )
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+    </>
   );
 }

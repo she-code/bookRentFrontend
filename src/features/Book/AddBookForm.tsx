@@ -11,18 +11,21 @@ import CustomSelect from "../../components/DropDown/CustomSelect";
 import { fetchCategories } from "../Category/categoryActions";
 import {
   addBookSuccess,
+  clearBookFields,
   requestFailure,
   requestStart,
   setAuthor,
   setBookAvailability,
   setBookTitle,
   setCategoryId,
+  setCondition,
   setDescription,
   setQuantity,
   setRentAmount,
 } from "./bookSlice";
 import FileUploadContainer from "../../components/TextField/FileUploadContainer";
 import { registerBook } from "./bookActions";
+import CustomText from "../../components/Typography/CustomText";
 
 export default function AddBookForm(props: {
   open: boolean;
@@ -41,10 +44,13 @@ export default function AddBookForm(props: {
     book_title,
     author,
     quantity,
-    bookAvailability,
-    rent_amount,
+    availability,
+    rentalPrice,
+    condition,
     categoryId,
     description,
+    error,
+    loading,
   } = useAppSelector((state) => state.books);
 
   const availabilityOptions = [
@@ -71,26 +77,14 @@ export default function AddBookForm(props: {
   const schema = z.object({
     book_title: z.string().min(1, "Book title is required"),
     author: z.string().min(1, "Book Author is required"),
-    bookAvailability: z.string().min(1, "Book Availability is required"),
+    availability: z.string().min(1, "Book Availability is required"),
     description: z.string().min(1, "Description is required"),
+    condition: z.string().min(1, "Condition is required"),
 
     categoryId: z.number().min(1, "category is required"),
 
     quantity: z.number().min(1, "quantity must be number"),
-    rent_amount: z.number().min(1, "rent_amount must be number"),
-
-    // selectedFiles: z.object({
-    //   image: z
-    //     .instanceof(File)
-    //     .refine((file) => file.type.startsWith("image/"), {
-    //       message: "Invalid image file type. Only images are allowed.",
-    //     }),
-    //   pdf: z
-    //     .instanceof(File)
-    //     .refine((file) => file.type === "application/pdf", {
-    //       message: "Invalid PDF file type. Only PDFs are allowed.",
-    //     }),
-    // }),
+    rentalPrice: z.number().min(1, "rental Price must be number"),
   });
 
   async function handleSubmit(
@@ -101,10 +95,11 @@ export default function AddBookForm(props: {
       book_title,
       author,
       quantity,
-      bookAvailability,
-      rent_amount,
+      availability,
+      rentalPrice,
       categoryId,
       description,
+      condition,
       //   selectedFiles,
     });
     if (result.success) {
@@ -112,8 +107,8 @@ export default function AddBookForm(props: {
         book_title,
         author,
         quantity,
-        bookAvailability,
-        rent_amount,
+        availability,
+        rentalPrice,
         categoryId
       );
       dispatch(requestStart());
@@ -122,9 +117,10 @@ export default function AddBookForm(props: {
           book_title,
           author,
           quantity,
-          bookAvailability: bookAvailability as string,
-          rent_amount,
+          availability: availability as string,
+          rentalPrice,
           description,
+          condition,
           categoryId: categoryId as number,
           image: selectedFiles.image as File,
           file: selectedFiles.pdf as File,
@@ -138,6 +134,7 @@ export default function AddBookForm(props: {
         // Handle the success case
         console.log("Success:", response.payload);
         dispatch(addBookSuccess(response.payload));
+        dispatch(clearBookFields());
         setOpen(false);
       }
     } else {
@@ -164,6 +161,16 @@ export default function AddBookForm(props: {
         Add Book
       </DialogTitle>
       <DialogContent>
+        {error ? (
+          <CustomText
+            text={error as string}
+            fontSize={18}
+            color="red"
+            fontWeight={200}
+          />
+        ) : (
+          <></>
+        )}
         <form onSubmit={handleSubmit}>
           <CustomTextField
             placeholder=""
@@ -203,6 +210,18 @@ export default function AddBookForm(props: {
           />
           <CustomTextField
             placeholder=""
+            label="Condition"
+            type="text"
+            error={!!errors.condition}
+            helperText={errors.condition}
+            name={"condition"}
+            value={condition as string}
+            handleInputChangeCB={(e) => {
+              dispatch(setCondition(e.target.value));
+            }}
+          />
+          <CustomTextField
+            placeholder=""
             label="Quantity"
             type="number"
             error={!!errors.quantity}
@@ -217,10 +236,10 @@ export default function AddBookForm(props: {
             placeholder=""
             label="Rent Amount"
             type="number"
-            error={!!errors.rent_amount}
-            helperText={errors.rent_amount as string}
-            name={"rent_amount"}
-            value={rent_amount?.toString() as string}
+            error={!!errors.rentalPrice}
+            helperText={errors.rentalPrice as string}
+            name={"rentalPrice"}
+            value={rentalPrice?.toString() as string}
             handleInputChangeCB={(e) => {
               dispatch(setRentAmount(Number(e.target.value)));
             }}
@@ -242,14 +261,14 @@ export default function AddBookForm(props: {
 
           <CustomSelect<string>
             label="Availability"
-            name="bookAvailability"
+            name="availability"
             options={availabilityOptions}
-            value={bookAvailability as string}
+            value={availability as string}
             onChange={(e) => dispatch(setBookAvailability(e.target.value))}
             getOptionLabel={(option) => option.label}
             getOptionValue={(option) => option.value}
-            error={!!errors.bookAvailability}
-            helperText={errors.bookAvailability as string}
+            error={!!errors.availability}
+            helperText={errors.availability as string}
           />
           <FileUploadContainer
             onFileSelect={(file) => onFileSelect(file, "image")}
@@ -261,7 +280,7 @@ export default function AddBookForm(props: {
           />
 
           <CustomButton
-            text="Add"
+            text={loading ? "Please wait.." : "Add"}
             variant="contained"
             mt={4}
             bgColor="#00ABFF"

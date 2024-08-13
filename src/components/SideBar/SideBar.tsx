@@ -9,11 +9,11 @@ import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import List from "@mui/material/List";
-
 import Divider from "@mui/material/Divider";
-import { Link } from "react-router-dom";
-import { useAppSelector, useAppDispacth } from "../../app/hooks";
-import { fetchUser } from "../../features/User/userActions";
+import { Link, NavLink } from "react-router-dom";
+import { useAppDispacth, useAppSelector } from "../../app/hooks";
+import Logo from "../Typography/Logo";
+import { fetchUser } from "../../features/Auth/authActions";
 
 export default function SideBar(props: {
   open: boolean;
@@ -23,15 +23,10 @@ export default function SideBar(props: {
   const theme = useTheme();
   const drawerWidth = 240;
 
-  //   const [open, setOpen] = React.useState(true);
-
-  //   const handleDrawerOpen = () => {
-  //     setOpen(true);
-  //   };
-
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
   const DrawerHeader = styled("div")(({ theme }) => ({
     display: "flex",
     alignItems: "center",
@@ -41,15 +36,29 @@ export default function SideBar(props: {
     justifyContent: "flex-end",
   }));
 
-  const { user } = useAppSelector((state) => state.users);
+  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispacth();
+
   useEffect(() => {
     dispatch(fetchUser());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const StyledNavLink = styled(NavLink)(({ theme }) => ({
+    textDecoration: "none",
+    color: "inherit",
+
+    "&.active": {
+      color: theme.palette.primary.main,
+      backgroundColor: theme.palette.action.selected,
+    },
+  }));
+
   const ownerMenuItems = ["Dashboard", "Books", "Rents"];
   const adminMenuItems = ["Dashboard", "Owners", "Books", "Customers", "Rents"];
-  const menuItems = user?.userType == "admin" ? adminMenuItems : ownerMenuItems;
+  const menuItems =
+    user?.userType === "admin" ? adminMenuItems : ownerMenuItems;
+
   return (
     <Drawer
       sx={{
@@ -65,6 +74,9 @@ export default function SideBar(props: {
       open={open}
     >
       <DrawerHeader>
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <Logo my={0} mr={4} fontSize={18} />
+        </Link>
         <IconButton onClick={handleDrawerClose}>
           {theme.direction === "ltr" ? (
             <ChevronLeftIcon />
@@ -78,7 +90,7 @@ export default function SideBar(props: {
         {menuItems.map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton
-              component={Link}
+              component={StyledNavLink}
               to={`/${text.toLowerCase().replace(" ", "-")}`}
             >
               <ListItemIcon>
