@@ -6,14 +6,12 @@ import NavBar from "../../components/Navigation/NavBar";
 import { Book } from "../../types/bookTypes";
 import { getApprovedBooks } from "../Book/bookActions";
 import { fetchUser } from "../Auth/authActions";
-import { useParams } from "react-router-dom";
 
-export default function CategoryFilteredPage() {
+export default function CategoryFilteredPage(props: { id: string }) {
+  const { id } = props;
   const dispatch = useAppDispacth();
   const { approvedBooks } = useAppSelector((state) => state.books);
   const [loadingBooks, setLoadingBooks] = useState(true);
-  const { id } = useParams<{ id: string }>();
-  console.log({ id });
   useEffect(() => {
     const fetchData = async () => {
       try {

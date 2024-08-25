@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import HomePage from "../features/Home/HomePage";
 import LoginPage from "../features/Auth/Login/LoginPage";
 import SignUpPage from "../features/Auth/SignUp/SignUp";
@@ -14,48 +14,67 @@ import BookDetailsPage from "../features/Book/BookDetailsPage";
 import CategoryFilteredPage from "../features/Category/CategoryFilteredPage";
 import RentsPage from "../features/Rent/RentsPage";
 import NotFoundPage from "./NotFoundPage";
-const router = createBrowserRouter([
-  { path: "/", element: <HomePage /> },
-  { path: "/login", element: <RedirectWrapper element={<LoginPage />} /> },
-  { path: "/adminSignup", element: <SignUpPage /> },
-  { path: "/ownerSignup", element: <SignUpPage /> },
-  { path: "/signup", element: <SignUpPage /> },
+import AppContainer from "../components/AppContainer";
+import { useRoutes } from "raviger";
+import { Suspense } from "react";
+import Loading from "../components/Loading/Loading";
 
-  {
-    path: "/bookRent/:id",
-    element: <ProtectedRoute children={<CheckoutPage />} />,
-  },
-  {
-    path: "/category/:id",
-    element: <CategoryFilteredPage />,
-  },
-  {
-    path: "/dashboard",
-    element: <ProtectedRoute children={<Dashboard />} />,
-  },
-  {
-    path: "/owners",
-    element: <ProtectedRoute children={<OwnersPage />} />,
-  },
-  {
-    path: "/books",
-    element: <ProtectedRoute children={<BooksPage />} />,
-  },
-  {
-    path: "/customers",
-    element: <ProtectedRoute children={<CustomersPage />} />,
-  },
-  {
-    path: "/rents",
-    element: <ProtectedRoute children={<RentsPage />} />,
-  },
-  {
-    path: "/bookDetails/:id",
-    element: <BookDetailsPage />,
-  },
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
-]);
-export default router;
+export default function AppRouter(props: {
+  collapsed: boolean;
+  toggleCollapsedCB: () => void;
+}) {
+  const routes = {
+    "/": () => (
+      <Suspense fallback={<Loading />}>
+        <HomePage />
+      </Suspense>
+    ),
+    "/login": () => <LoginPage />,
+    "/adminSignup": () => <SignUpPage />,
+    "/ownerSignup": () => <SignUpPage />,
+    "/signup": () => <SignUpPage />,
+    "/bookRent/:id": ({ id }: { id: string }) => (
+      <ProtectedRoute>
+        <CheckoutPage id={id} />
+      </ProtectedRoute>
+    ),
+    "/category/:id": ({ id }: { id: string }) => (
+      <CategoryFilteredPage id={id} />
+    ),
+    "/dashboard": () => (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+    "/owners": () => (
+      <ProtectedRoute>
+        <OwnersPage />
+      </ProtectedRoute>
+    ),
+    "/books": () => (
+      <ProtectedRoute>
+        <BooksPage />
+      </ProtectedRoute>
+    ),
+    "/customers": () => (
+      <ProtectedRoute>
+        <CustomersPage />
+      </ProtectedRoute>
+    ),
+    "/rents": () => (
+      <ProtectedRoute>
+        <RentsPage />
+      </ProtectedRoute>
+    ),
+    "/bookDetails/:id": ({ id }: { id: string }) => <BookDetailsPage id={id} />,
+    "*": () => <NotFoundPage />,
+  };
+  const { collapsed, toggleCollapsedCB } = props;
+  const routeResult = useRoutes(routes);
+
+  return (
+    <AppContainer collapsed={collapsed} toggleSidebar={toggleCollapsedCB}>
+      {routeResult}
+    </AppContainer>
+  );
+}

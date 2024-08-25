@@ -4,7 +4,7 @@ import CustomText from "../../../components/Typography/CustomText";
 import CustomButton from "../../../components/Button/CustomButton";
 import { MenuBookOutlined } from "@mui/icons-material";
 import Logo from "../../../components/Typography/Logo";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "raviger";
 import { useAppDispacth, useAppSelector } from "../../../app/hooks";
 import { useState } from "react";
 import { loginUser } from "../authActions";
@@ -156,7 +156,7 @@ export default function LoginPage() {
               />
             </form>
             <Typography mt={3}>
-              <Link to={"/signup"}> Create account instead.</Link>
+              <Link href={"/signup"}> Create account instead.</Link>
             </Typography>
           </Grid>
         </Grid>

@@ -16,7 +16,7 @@ import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchCategories } from "../../features/Category/categoryActions";
 import LinkButton from "../Button/LinkButton";
 import CustomButton from "../Button/CustomButton";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "raviger";
 import { fetchUser, logoutUser } from "../../features/Auth/authActions";
 
 const NavBar: React.FC = () => {
@@ -63,7 +63,7 @@ const NavBar: React.FC = () => {
               // justifyContent: "space-evely",
             }}
           >
-            <Link to="/" style={{ textDecoration: "none" }}>
+            <Link href="/" style={{ textDecoration: "none" }}>
               <Box mr={3}>
                 <Logo my={2} />
               </Box>
@@ -84,7 +84,7 @@ const NavBar: React.FC = () => {
             <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
               {categories?.map((category) => (
                 <Link
-                  to={`/category/${category.id}`}
+                  href={`/category/${category.id}`}
                   style={{ textDecoration: "none" }}
                   key={category.id}
                 >

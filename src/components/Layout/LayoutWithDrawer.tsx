@@ -10,7 +10,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import MenuIcon from "@mui/icons-material/Menu";
 import SideBar from "../../components/SideBar/SideBar";
 import { useState, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "raviger";
 import { useAppDispacth } from "../../app/hooks";
 import { logoutUser } from "../../features/Auth/authActions";
 import CustomButton from "../Button/CustomButton";

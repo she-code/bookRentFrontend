@@ -1,22 +1,22 @@
 import Cookies from "js-cookie";
-
-import { Navigate, useLocation } from "react-router-dom";
-
-// const isAuthenticated = () => {
-//   return !!Cookies.get("jwt");
-// };
+import { navigate } from "raviger";
 
 export default function ProtectedRoute({
   children,
 }: {
   children: JSX.Element;
 }) {
-  const { pathname } = useLocation();
-
+  // Check for authentication token in localStorage or cookies
   const isAuth = !!localStorage.getItem("token") || !!Cookies.get("jwt");
-  console.log({ isAuth });
+
   if (isAuth) {
     return <>{children}</>;
   }
-  return <Navigate to="/login" replace state={{ referrer: pathname }} />;
+
+  // Redirect to login page if not authenticated
+  navigate("/login", {
+    replace: true,
+    state: { referrer: window.location.pathname },
+  });
+  return null; // Render nothing while redirecting
 }

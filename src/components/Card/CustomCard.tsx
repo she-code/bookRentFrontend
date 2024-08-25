@@ -4,7 +4,7 @@ import CardMedia from "@mui/material/CardMedia";
 import { CardActionArea, CardActions, Typography } from "@mui/material";
 import { Book } from "../../types/bookTypes";
 import LinkButton from "../Button/LinkButton";
-import { Link } from "react-router-dom";
+import { Link } from "raviger";
 import CustomText from "../Typography/CustomText";
 import defaultImage from "../../assets/default-image.jpg";
 export default function CustomCard(props: { data: Book }) {
@@ -33,7 +33,7 @@ export default function CustomCard(props: { data: Book }) {
   return (
     <Card sx={{ maxWidth: 345, height: 350 }}>
       <CardActionArea>
-        <Link to={`/bookDetails/${data.id}`}>
+        <Link href={`/bookDetails/${data.id}`}>
           <CardMedia
             component="img"
             height="200"

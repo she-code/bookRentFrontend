@@ -33,3 +33,8 @@ export type AddRentParams = {
   totalAmount: number;
   bookCopyId: number;
 };
+
+export type QueryParams = {
+  copyId?: string; // Optional, as not all routes may have this parameter
+  [key: string]: string | undefined; // For any other potential query parameters
+};

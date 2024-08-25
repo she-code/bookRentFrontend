@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link } from "raviger";
 
 export default function LinkButton(props: {
   to: string;
@@ -13,7 +13,7 @@ export default function LinkButton(props: {
       color="primary"
       variant="outlined"
       component={Link}
-      to={`${to}`}
+      href={`${to}`}
       sx={{ textDecoration: "none", width: { width } }}
     >
       {text}

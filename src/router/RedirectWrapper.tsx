@@ -1,5 +1,5 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { navigate } from "raviger";
 import Cookies from "js-cookie";
 
 interface RedirectWrapperProps {
@@ -10,8 +10,18 @@ const RedirectWrapper: React.FC<RedirectWrapperProps> = ({ element }) => {
   const isAuthenticated =
     !!Cookies.get("jwt") || !!localStorage.getItem("token");
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Redirect to login page if not authenticated
+      navigate("/login", {
+        replace: true,
+        state: { referrer: window.location.pathname },
+      });
+    }
+  }, [isAuthenticated]);
+
   // Redirect authenticated users away from the login page
-  return isAuthenticated ? <Navigate to="/" replace /> : <>{element}</>;
+  return isAuthenticated ? <>{element}</> : null;
 };
 
 export default RedirectWrapper;

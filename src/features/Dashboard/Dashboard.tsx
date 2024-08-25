@@ -1,34 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
-import LayoutWithDrawer from "../../components/Layout/LayoutWithDrawer";
 import { fetchUser } from "../Auth/authActions";
-import AdminContent from "./AdminContent";
-import OwnerContent from "./OwnerContent";
+
+import { Box, Paper } from "@mui/material";
+import CustomText from "../../components/Typography/CustomText";
+import MonthStastics from "./MonthStastics";
+import LiveBookStatus from "./LiveBookStatus";
 
 export default function PersistentDrawerLeft() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispacth();
 
-  // Use local state to handle loading
-  const [isContentLoaded, setIsContentLoaded] = useState(false);
-
   useEffect(() => {
     dispatch(fetchUser()).finally(() => {
-      setIsContentLoaded(true); // Set content loaded to true after fetching
+      // setIsContentLoaded(true); // Set content loaded to true after fetching
     });
   }, [dispatch]);
 
-  if (!isContentLoaded) {
-    return (
-      <LayoutWithDrawer title="Dashboard">
-        <>loading..</>
-      </LayoutWithDrawer>
-    );
-  }
-
   return (
-    <LayoutWithDrawer title="Dashboard">
-      {user?.userType === "admin" ? <AdminContent /> : <OwnerContent />}
-    </LayoutWithDrawer>
+    // <LayoutWithDrawer title="Dashboard">
+    <>
+      <Paper sx={{ p: 2, borderRadius: 3, boxShadow: "none", mb: 4 }}>
+        <CustomText
+          text="Dashboard"
+          fontSize={22}
+          fontWeight={400}
+          color="grey"
+          ml={4}
+        />
+      </Paper>
+      <Box sx={{ display: "flex" }}>
+        <MonthStastics />
+        <LiveBookStatus />
+      </Box>
+      {/* {user?.userType === "admin" ? <AdminContent /> : <OwnerContent />} */}
+      {/* </LayoutWithDrawer> */}
+    </>
   );
 }

@@ -14,22 +14,22 @@ import {
 import { Add, Remove } from "@mui/icons-material";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchBookCopy } from "./bookActions";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useQueryParams } from "raviger";
 import { addRent } from "../Rent/rentAction";
 import NavBar from "../../components/Navigation/NavBar";
 import { addRentSuccess } from "../Rent/rentSlice";
 import defaultImage from "../../assets/default-image.jpg";
-export default function CheckoutPage() {
+export default function CheckoutPage(props: { id: string }) {
+  const { id } = props;
   // Initial state for quantity
   const [quantity, setQuantity] = useState<number>(1);
   const dispatch = useAppDispacth();
-  const { id } = useParams<{ id: string }>();
   const bookId = Number(id);
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const copyId = queryParams.get("copyId");
+  const [query] = useQueryParams();
+
+  // const copyId = queryParams?.get("copyId") as string;
   const { bookCopy } = useAppSelector((state) => state.books);
-  const bookCopyId = Number(copyId);
+  const bookCopyId = Number(query.copyId);
   useEffect(() => {
     dispatch(fetchBookCopy(bookCopyId));
     // eslint-disable-next-line react-hooks/exhaustive-deps

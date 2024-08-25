@@ -3,14 +3,14 @@ import { useEffect } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+// import ListItemButton from "@mui/material/ListItemButton";
+// import ListItemIcon from "@mui/material/ListItemIcon";
+// import ListItemText from "@mui/material/ListItemText";
+// import InboxIcon from "@mui/icons-material/MoveToInbox";
+// import MailIcon from "@mui/icons-material/Mail";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "raviger";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import Logo from "../Typography/Logo";
 import { fetchUser } from "../../features/Auth/authActions";
@@ -44,7 +44,7 @@ export default function SideBar(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const StyledNavLink = styled(NavLink)(({ theme }) => ({
+  const StyledNavLink = styled(Link)(({ theme }) => ({
     textDecoration: "none",
     color: "inherit",
 
@@ -74,7 +74,7 @@ export default function SideBar(props: {
       open={open}
     >
       <DrawerHeader>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <Logo my={0} mr={4} fontSize={18} />
         </Link>
         <IconButton onClick={handleDrawerClose}>
@@ -89,7 +89,7 @@ export default function SideBar(props: {
       <List>
         {menuItems.map((text, index) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton
+            {/* <ListItemButton
               component={StyledNavLink}
               to={`/${text.toLowerCase().replace(" ", "-")}`}
             >
@@ -97,7 +97,7 @@ export default function SideBar(props: {
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={text} />
-            </ListItemButton>
+            </ListItemButton> */}
           </ListItem>
         ))}
       </List>

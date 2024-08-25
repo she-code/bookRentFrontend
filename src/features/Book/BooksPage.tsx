@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BookCopy } from "../../types/bookTypes";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { deleteBook, fetchBooks, fetchOwnerBooks } from "./bookActions";
-import { Box } from "@mui/material";
+import { Box, capitalize, ThemeProvider } from "@mui/material";
 
 import {
   MaterialReactTable,
@@ -10,8 +10,8 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import CustomButton from "../../components/Button/CustomButton";
-import LayoutWithDrawer from "../../components/Layout/LayoutWithDrawer";
-import EditBookForm from "./EditBookForm";
+
+import { theme } from "../../utils";
 
 const BooksPage = () => {
   const dispatch = useAppDispacth();
@@ -45,34 +45,31 @@ const BooksPage = () => {
   const columns: MRT_ColumnDef<BookCopy>[] = [
     {
       accessorKey: "book",
-      header: "Title",
+      header: "Book Name",
       size: 100,
-      Cell: ({ cell }) => cell.getValue<BookCopy["book"]>()?.book_title,
+      Cell: ({ cell }) =>
+        capitalize(
+          (cell.getValue<BookCopy["book"]>()?.book_title as string) || ""
+        ),
     },
     {
       accessorKey: "book",
       header: "Author",
       size: 100,
-      Cell: ({ cell }) => cell.getValue<BookCopy["book"]>()?.author,
+      Cell: ({ cell }) =>
+        capitalize((cell.getValue<BookCopy["book"]>()?.author as string) || ""),
     },
-    {
-      accessorKey: "createdAt",
-      header: "Uploaded At",
-      size: 100,
-      Cell: ({ cell }) => {
-        const date = new Date(cell.getValue() as string);
-        return date.toLocaleDateString();
-      },
-      enableColumnFilter: false,
-    },
+
     {
       accessorKey: "owner",
       header: "Owner",
       size: 150,
       Cell: ({ cell }) =>
-        `${cell.getValue<BookCopy["owner"]>()?.firstName} ${
-          cell.getValue<BookCopy["owner"]>()?.lastName
-        }`,
+        `${capitalize(
+          (cell.getValue<BookCopy["owner"]>()?.firstName as string) || ""
+        )} ${capitalize(
+          (cell.getValue<BookCopy["owner"]>()?.lastName as string) || ""
+        )}`,
     },
     {
       accessorKey: "book",
@@ -81,35 +78,7 @@ const BooksPage = () => {
       Cell: ({ cell }) =>
         cell.getValue<BookCopy["book"]>()?.Category?.category_name,
     },
-    {
-      accessorKey: "owner",
-      header: "Location",
-      size: 100,
-      Cell: ({ cell }) => cell.getValue<BookCopy["owner"]>()?.location,
-    },
-    {
-      accessorKey: "quantity",
-      header: "Quantity",
-      size: 100,
 
-      enableColumnFilter: false,
-      enableSorting: true,
-    },
-
-    {
-      accessorKey: "availability",
-      header: "Availability",
-      size: 100,
-      enableColumnFilter: false,
-      enableSorting: true,
-    },
-    {
-      accessorKey: "rentalPrice",
-      header: "Rent Price",
-      size: 100,
-      enableColumnFilter: false,
-      enableSorting: true,
-    },
     {
       accessorKey: "approved",
       header: "Approved",
@@ -153,18 +122,17 @@ const BooksPage = () => {
   const table = useMaterialReactTable<BookCopy>({
     columns,
     data: bookData,
-    initialState: { showColumnFilters: true },
+    initialState: { showColumnFilters: false },
   });
 
   return (
-    <LayoutWithDrawer title="Books">
+    <ThemeProvider theme={theme}>
       <Box py={8} pl={4}>
         <Box width={"95%"} mt={4}>
           <MaterialReactTable table={table} />
         </Box>
-        <EditBookForm open={open} setOpen={setOpen} bookId={bookId} />
       </Box>
-    </LayoutWithDrawer>
+    </ThemeProvider>
   );
 };
 export default BooksPage;

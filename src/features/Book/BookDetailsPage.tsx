@@ -13,15 +13,15 @@ import {
 } from "@mui/material";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { fetchBook } from "./bookActions";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "raviger";
 import { setLoading } from "./bookSlice";
 import CustomButton from "../../components/Button/CustomButton";
 import NavBar from "../../components/Navigation/NavBar";
 import defaultImage from "../../assets/default-image.jpg";
 
-export default function BookDetailsPage() {
+export default function BookDetailsPage(props: { id: string }) {
+  const { id } = props;
   const dispatch = useAppDispacth();
-  const { id } = useParams<{ id: string }>();
   const bookId = Number(id);
   const { book, loading } = useAppSelector((state) => state.books);
   const navigate = useNavigate();
