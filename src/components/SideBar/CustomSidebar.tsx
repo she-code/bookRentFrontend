@@ -9,7 +9,6 @@ import { ArrowBackIos } from "@mui/icons-material";
 export default function CustomSidebar(props: { user: User | null }) {
   const [toggle, setToggle] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
-
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 1000);
@@ -22,6 +21,7 @@ export default function CustomSidebar(props: { user: User | null }) {
       window.removeEventListener("resize", handleResize);
     };
   }, [isSmallScreen]);
+
   return (
     <Box
       sx={{

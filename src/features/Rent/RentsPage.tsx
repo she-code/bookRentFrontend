@@ -1,15 +1,17 @@
 import { useEffect } from "react";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
-import { Box } from "@mui/material";
+import { Box, capitalize, ThemeProvider } from "@mui/material";
 
 import {
   MaterialReactTable,
   MRT_ColumnDef,
   useMaterialReactTable,
 } from "material-react-table";
-import LayoutWithDrawer from "../../components/Layout/LayoutWithDrawer";
 import { Rent } from "../../types/rentType";
 import { fetchOwnerRents, fetchRents } from "./rentAction";
+import CustomNavHeading from "../../components/Navigation/CustomNavHeading";
+import { theme } from "../../utils";
+import CustomText from "../../components/Typography/CustomText";
 
 const RentsPage = () => {
   const dispatch = useAppDispacth();
@@ -60,10 +62,15 @@ const RentsPage = () => {
       accessorKey: "renter",
       header: "Rented By",
       size: 150,
-      Cell: ({ cell }) =>
-        `${cell.getValue<Rent["renter"]>()?.firstName} ${
-          cell.getValue<Rent["renter"]>()?.lastName
-        }`,
+      Cell: ({ cell }) => {
+        const firstName = capitalize(
+          cell.getValue<Rent["renter"]>()?.firstName as string
+        );
+        const lastName = capitalize(
+          cell.getValue<Rent["renter"]>()?.lastName as string
+        );
+        return `${firstName} ${lastName}`;
+      },
     },
     {
       accessorKey: "quantity",
@@ -97,7 +104,7 @@ const RentsPage = () => {
             Cell: ({ cell }) => {
               const owner = cell.getValue() as Rent["owner"] | undefined;
               return owner
-                ? `${owner.firstName} ${owner.lastName}`
+                ? `${capitalize(owner.firstName)} ${capitalize(owner.lastName)}`
                 : "Not Available";
             },
           },
@@ -108,17 +115,27 @@ const RentsPage = () => {
   const table = useMaterialReactTable<Rent>({
     columns,
     data: bookData,
-    initialState: { showColumnFilters: true },
+    initialState: { showColumnFilters: false },
+    muiTopToolbarProps: {
+      sx: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+      },
+    },
+    renderTopToolbarCustomActions: () => (
+      <CustomText text="List Of Rents" fontSize={16} fontWeight={700} mt={5} />
+    ),
   });
 
   return (
-    <LayoutWithDrawer title="Rents">
-      <Box py={8} pl={4}>
-        <Box width={"95%"} mt={4}>
+    <ThemeProvider theme={theme}>
+      <Box pl={4}>
+        <CustomNavHeading title="Admin" sub="Rents" />
+        <Box mt={4}>
           <MaterialReactTable table={table} />
         </Box>
       </Box>
-    </LayoutWithDrawer>
+    </ThemeProvider>
   );
 };
 export default RentsPage;

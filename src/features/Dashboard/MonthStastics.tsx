@@ -1,9 +1,35 @@
 import { Box, Card, CardContent, Divider, Paper } from "@mui/material";
 import CustomText from "../../components/Typography/CustomText";
-import { formatDate } from "../../utils";
+import { formatDate, getMonthRange, sumTotalAmountForMonth } from "../../utils";
 import AvilableBooksChart from "./AvilableBooksChart";
+import { useAppSelector } from "../../app/hooks";
+
+import { subMonths } from "date-fns";
 
 export default function MonthStastics() {
+  const { rents } = useAppSelector((state) => state.rents);
+  const { user } = useAppSelector((state) => state.auth);
+  const ownerRents = rents.filter((rent) => rent.ownerId == user?.id);
+
+  // Define the current month and the previous month
+  const currentMonthRange = getMonthRange(new Date());
+  const previousMonthRange = getMonthRange(subMonths(new Date(), 1));
+
+  const rentData = user?.userType == "admin" ? rents : ownerRents;
+  // Calculate sums
+  const currentMonthTotal = sumTotalAmountForMonth(rentData, currentMonthRange);
+  const previousMonthTotal = sumTotalAmountForMonth(
+    rentData,
+    previousMonthRange
+  );
+
+  // Compute the difference
+  const difference = currentMonthTotal - previousMonthTotal;
+
+  // Calculate percentage difference
+  const percentageDifference = previousMonthTotal
+    ? (difference / previousMonthTotal) * 100
+    : 0;
   return (
     <Paper
       sx={{
@@ -11,7 +37,6 @@ export default function MonthStastics() {
         p: 3,
         borderRadius: 4,
         width: "20%",
-        height: "95%",
       }}
     >
       <Box>
@@ -68,20 +93,20 @@ export default function MonthStastics() {
               alignItems={"flex-end"}
             >
               <CustomText
-                text="ETB 9460.0"
+                text={`ETB ${currentMonthTotal}`}
                 fontSize={28}
                 fontWeight={700}
                 color="#01150C"
               />
               <CustomText
-                text="15%"
+                text={`${percentageDifference}%`}
                 fontSize={14}
                 fontWeight={400}
-                color="red"
+                color={percentageDifference > 0 ? "green" : "red"}
               />
             </Box>
             <CustomText
-              text="Compared to ETB 78999 last month"
+              text={`Compared to ETB ${difference} last month`}
               fontSize={15}
               color="#656575"
               fontWeight={100}
@@ -99,7 +124,7 @@ export default function MonthStastics() {
                 color="#525256"
               />
               <CustomText
-                text="ETB 69699"
+                text={`ETB ${previousMonthTotal}`}
                 fontSize={14}
                 fontWeight={400}
                 color="#525256"

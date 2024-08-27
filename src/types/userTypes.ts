@@ -31,4 +31,5 @@ export type UserStateType = {
   owners: User[];
   ownerRequests: User[];
   customers: User[];
+  owner: User | null;
 };

@@ -22,6 +22,8 @@ export default function AppContainer(props: {
   const matchOwners = useMatch("/owners");
   const matchDashboard = useMatch("/dashboard");
   const matchBooks = useMatch("/books");
+  const matchRents = useMatch("/rents");
+  const matchUploadBook = useMatch("/uploadBook");
 
   return (
     <Box
@@ -29,13 +31,15 @@ export default function AppContainer(props: {
         width: "100%",
         height: "100vh",
         display: "flex",
-        overflow: "hidden",
+        overflowX: "hidden",
         backgroundColor: `${Background_Color}`,
       }}
     >
-      {(matchOwners || matchDashboard || matchBooks) && (
-        <CustomSidebar user={user} />
-      )}
+      {(matchOwners ||
+        matchDashboard ||
+        matchBooks ||
+        matchRents ||
+        matchUploadBook) && <CustomSidebar user={user} />}
 
       <Box sx={{ width: "100%", mx: "auto", p: 6, pt: 2 }}>
         {props.children}

@@ -15,6 +15,7 @@ const initialState: UserStateType = {
   users: [],
   ownerRequests: [],
   customers: [],
+  owner: null,
 };
 
 const userSlice = createSlice({
@@ -25,6 +26,11 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.customers = action.payload;
+    },
+    getOwnerSuccess(state, action: PayloadAction<User>) {
+      state.loading = false;
+      state.error = null;
+      state.owner = action.payload;
     },
     requestStart(state) {
       state.loading = true;
@@ -45,15 +51,21 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
       const { id, owner } = action.payload;
-      const user = state.ownerRequests.find((o) => o.id === id);
-      if (user) {
-        user.status = owner.status;
-        user.isApproved = owner.isApproved;
-        user.userType = owner.userType;
-        state.ownerRequests = state.ownerRequests.filter(
-          (book) => book.id !== action.payload.id
-        );
+      const ownerIndex = state.owners.findIndex((b: User) => b.id === id);
+
+      if (ownerIndex !== -1) {
+        // Update the approved property of the found book
+        state.owners[ownerIndex].isApproved = owner.isApproved;
       }
+      // const user = state.ownerRequests.find((o) => o.id === id);
+      // if (user) {
+      //   user.status = owner.status;
+      //   user.isApproved = owner.isApproved;
+      //   user.userType = owner.userType;
+      //   state.ownerRequests = state.ownerRequests.filter(
+      //     (book) => book.id !== action.payload.id
+      //   );
+      // }
     },
 
     updateOwnerStatusSuccess(
@@ -98,4 +110,5 @@ export const {
   updateOwnerApprovalSuccess,
   addOwner,
   getCustomersSuccess,
+  getOwnerSuccess,
 } = userSlice.actions;

@@ -1,60 +1,26 @@
-import { Box, createTheme, IconButton, ThemeProvider } from "@mui/material";
+import { Box, capitalize, IconButton, ThemeProvider } from "@mui/material";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
   useMaterialReactTable,
 } from "material-react-table";
 import { BookCopy } from "../../types/bookTypes";
-import { deleteBook, fetchBooks, fetchOwnerBooks } from "../Book/bookActions";
-import { useEffect, useState } from "react";
+import { deleteBook } from "../Book/bookActions";
+import { useState } from "react";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { Create, Delete } from "@mui/icons-material";
-
-const theme = createTheme({
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          boxShadow: "none",
-          border: "none",
-          borderRadius: "8px",
-          padding: "16px",
-        },
-      },
-    },
-    MuiTable: {
-      styleOverrides: {
-        root: {
-          border: "none",
-        },
-      },
-    },
-
-    MuiTableHead: {
-      styleOverrides: {
-        root: {
-          border: "none",
-          fontWeight: 300,
-          fontSize: "14px",
-          color: "#656575",
-        },
-      },
-    },
-  },
-});
+import EditBookForm from "../Book/EditBookForm";
+import CustomText from "../../components/Typography/CustomText";
+import { theme } from "../../utils";
+import Circle from "../../components/Circle";
+import { LightTextColor } from "../../config/constants";
+import SmoothAreaChart from "../../components/Chart/AreaChart";
 
 export default function LiveBookStatus() {
   const dispatch = useAppDispacth();
-  const { books, ownerBooks } = useAppSelector((state) => state.books);
+  const { approvedCopies } = useAppSelector((state) => state.books);
   const { user } = useAppSelector((state) => state.auth);
-  useEffect(() => {
-    if (user?.userType == "admin") {
-      dispatch(fetchBooks());
-    } else {
-      dispatch(fetchOwnerBooks());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { rents, ownerRents } = useAppSelector((state) => state.rents);
 
   const [open, setOpen] = useState(false);
   const [bookId, setBookID] = useState(0);
@@ -68,14 +34,14 @@ export default function LiveBookStatus() {
     console.log(`Approved item with ID: ${id}`);
     dispatch(deleteBook(id));
   };
-  const bookData = user?.userType === "owner" ? ownerBooks ?? [] : books ?? [];
+  const bookData = approvedCopies ?? [];
 
   const columns: MRT_ColumnDef<BookCopy>[] = [
     {
       accessorKey: "No",
       header: "No",
       size: 100,
-      Cell: ({ cell }) => cell.getValue<BookCopy["book"]>()?.book_title,
+      Cell: ({ row }) => row.index + 1,
     },
     {
       accessorKey: "book",
@@ -83,62 +49,130 @@ export default function LiveBookStatus() {
       size: 100,
       Cell: ({ cell }) => cell.getValue<BookCopy["book"]>()?.id,
     },
+    ...(user?.userType === "admin"
+      ? [
+          {
+            accessorKey: "owner",
+            header: "Owner",
+            size: 150,
+            Cell: ({ cell }) => {
+              const owner = cell.getValue() as BookCopy["owner"];
+              return `${capitalize(owner?.firstName || "")} ${capitalize(
+                owner?.lastName || ""
+              )}`;
+            },
+            enableColumnFilter: false,
+            enableSorting: false,
+          },
+        ]
+      : []),
     {
       accessorKey: "book",
       header: "Book Name",
       size: 100,
-      Cell: ({ cell }) => cell.getValue<BookCopy["book"]>()?.book_title,
+      Cell: ({ cell }) =>
+        capitalize(cell.getValue<BookCopy["book"]>()?.book_title as string),
     },
     {
-      accessorKey: "status",
+      accessorKey: "availability",
       header: "Status",
       size: 100,
-      Cell: ({ cell }) => cell.getValue() as string,
+      Cell: ({ cell }) => {
+        const availability = cell.getValue() as string;
+        const circleColor = availability === "available" ? "green" : "red";
+        const statusLabel = availability === "available" ? "Free" : "Rented";
+
+        return (
+          <Box display="flex" alignItems="center">
+            <Circle color={circleColor} />
+
+            <CustomText
+              text={statusLabel}
+              fontSize={14}
+              fontWeight={200}
+              color={LightTextColor}
+            />
+          </Box>
+        );
+      },
     },
     {
       accessorKey: "rentalPrice",
       header: "Price",
       size: 100,
-      Cell: ({ cell }) => (cell.getValue() as string) + " birr",
+      Cell: ({ cell }) => {
+        return (
+          <CustomText
+            text={(cell.getValue() as string) + " birr"}
+            fontSize={14}
+            fontWeight={200}
+            color={LightTextColor}
+          />
+        );
+      },
 
       enableColumnFilter: false,
     },
 
-    {
-      accessorKey: "actions",
-      header: "Actions",
-      size: 150,
-      Cell: ({ row }) => (
-        <Box display={"flex"} gap={2}>
-          {" "}
-          <IconButton onClick={() => handleEdit(row?.original?.id as number)}>
-            <Create />
-          </IconButton>
-          <IconButton onClick={() => handleDelete(row?.original?.id as number)}>
-            <Delete sx={{ color: "red" }} />
-          </IconButton>
-        </Box>
-      ),
-      enableColumnFilter: false,
-      enableSorting: false,
-    },
+    ...(user?.userType !== "admin"
+      ? [
+          {
+            accessorKey: "actions",
+            header: "Actions",
+            size: 150,
+            Cell: ({ row }) => (
+              <Box display={"flex"} gap={2}>
+                <IconButton
+                  onClick={() => handleEdit(row?.original?.id as number)}
+                >
+                  <Create sx={{ color: "rgba(0, 0, 0, 1)" }} />
+                </IconButton>
+                <IconButton
+                  onClick={() => handleDelete(row?.original?.id as number)}
+                >
+                  <Delete sx={{ color: "red" }} />
+                </IconButton>
+              </Box>
+            ),
+            enableColumnFilter: false,
+            enableSorting: false,
+          },
+        ]
+      : []),
   ];
 
   const table = useMaterialReactTable<BookCopy>({
     columns,
     data: bookData,
+
     initialState: {
       showColumnFilters: false,
       pagination: { pageSize: 5 },
     },
     enablePagination: true,
+    muiTableToolbarProps: {
+      sx: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+      },
+    },
+    renderTopToolbarCustomActions: () => (
+      <CustomText
+        text="Live Book Status"
+        fontSize={16}
+        fontWeight={700}
+        mt={5}
+      />
+    ),
   });
-
+  const rentData = user?.userType == "admin" ? rents : ownerRents;
   return (
     <ThemeProvider theme={theme}>
       <Box width={"80%"} ml={3} height={"90%"}>
         {" "}
         <MaterialReactTable table={table} />
+        <SmoothAreaChart rents={rentData} />
+        <EditBookForm open={open} setOpen={setOpen} bookId={bookId} />
       </Box>
     </ThemeProvider>
   );

@@ -3,6 +3,7 @@ import {
   getCustomersSuccess,
   getOwnerRequestsSuccess,
   getOwnersSuccess,
+  getOwnerSuccess,
   requestFailure,
   requestStart,
   updateOwnerApprovalSuccess,
@@ -11,6 +12,7 @@ import {
 import {
   getAllCustomers,
   getAllOwners,
+  getOwner,
   getOwnerRequests,
   updateOwnerApproval,
   updateOwnerStatus,
@@ -125,6 +127,27 @@ export const fetchCustomers = createAsyncThunk(
       } else {
         // Handle specific response errors
         const errorMessage = response.message || "Unable to fetch customers";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
+export const fetchOwner = createAsyncThunk(
+  "users/fetchOwner",
+  async (id: number, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await getOwner(id);
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(getOwnerSuccess(response.data));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch user";
         dispatch(requestFailure(errorMessage));
       }
     } catch (error) {

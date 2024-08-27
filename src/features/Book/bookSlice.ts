@@ -25,6 +25,7 @@ const initialState: BookStateType = {
   bookCopy: {
     quantity: 0,
   },
+  approvedCopies: [],
 };
 
 const bookSlice = createSlice({
@@ -40,6 +41,11 @@ const bookSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.bookCopy = action.payload;
+    },
+    getBookApprovedCopiesSuccess(state, action: PayloadAction<BookCopy[]>) {
+      state.loading = false;
+      state.error = null;
+      state.approvedCopies = action.payload;
     },
     addBookSuccess(state, action: PayloadAction<Book>) {
       state.loading = false;
@@ -106,17 +112,31 @@ const bookSlice = createSlice({
         (book) => book.id !== action.payload
       );
     },
-    updateBookStatusSuccess(state, action: PayloadAction<{ id: number }>) {
+    updateBookStatusSuccess(
+      state,
+      action: PayloadAction<{ id: number; book: BookCopy }>
+    ) {
       state.loading = false;
       state.error = null;
-      const { id } = action.payload;
-      const book = state.requestedBooks.find((b: BookCopy) => b?.id === id);
+      const { id, book } = action.payload;
+      const bookIndex = state.books.findIndex((b: BookCopy) => b.id === id);
       console.log({ book });
-      if (book) {
-        state.requestedBooks = state.requestedBooks.filter(
-          (book: BookCopy) => book.id !== action.payload.id
-        );
+      // Check if the book exists
+      if (bookIndex !== -1) {
+        // Update the approved property of the found book
+        state.books[bookIndex].approved = book.approved;
+        state.books[bookIndex].rejected = book.rejected;
       }
+      // const book = state.books.find((b: BookCopy) => b?.id === id);
+      // console.log({ book });
+      // if (book) {
+      //   // state.books = state.books.filter(
+      //   //   (book: BookCopy) => book.id !== action.payload.id
+      //   // );
+      //   state.books = state.books.filter(
+      //     (book: BookCopy) => book.id !== action.payload.id
+      //   );
+      // }
     },
     requestStart(state) {
       state.loading = true;
@@ -193,4 +213,5 @@ export const {
   clearBookFields,
   updateRentAmount,
   removeBookSuccess,
+  getBookApprovedCopiesSuccess,
 } = bookSlice.actions;

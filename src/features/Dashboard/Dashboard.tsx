@@ -1,40 +1,43 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAppDispacth, useAppSelector } from "../../app/hooks";
-import { fetchUser } from "../Auth/authActions";
 
-import { Box, Paper } from "@mui/material";
-import CustomText from "../../components/Typography/CustomText";
+import { Box } from "@mui/material";
 import MonthStastics from "./MonthStastics";
 import LiveBookStatus from "./LiveBookStatus";
+import CustomNavHeading from "../../components/Navigation/CustomNavHeading";
+import { fetchApprovedCoppies } from "../Book/bookActions";
+import { BookCopy } from "../../types/bookTypes";
+import { deepEqual } from "../../utils";
+import { fetchOwnerRents, fetchRents } from "../Rent/rentAction";
 
 export default function PersistentDrawerLeft() {
-  const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispacth();
+  const { approvedCopies } = useAppSelector((state) => state.books);
+  const { user } = useAppSelector((state) => state.auth);
+  const prevApprovedCopiesRef = useRef<BookCopy[]>();
 
   useEffect(() => {
-    dispatch(fetchUser()).finally(() => {
-      // setIsContentLoaded(true); // Set content loaded to true after fetching
-    });
-  }, [dispatch]);
-
+    if (!deepEqual(prevApprovedCopiesRef.current, approvedCopies)) {
+      dispatch(fetchApprovedCoppies());
+      prevApprovedCopiesRef.current = approvedCopies;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [approvedCopies, dispatch]);
+  useEffect(() => {
+    dispatch(fetchRents());
+    dispatch(fetchOwnerRents());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    // <LayoutWithDrawer title="Dashboard">
     <>
-      <Paper sx={{ p: 2, borderRadius: 3, boxShadow: "none", mb: 4 }}>
-        <CustomText
-          text="Dashboard"
-          fontSize={22}
-          fontWeight={400}
-          color="grey"
-          ml={4}
-        />
-      </Paper>
-      <Box sx={{ display: "flex" }}>
+      <CustomNavHeading
+        title={user?.userType == "admin" ? "Admin" : "Owner"}
+        sub="Dashboard"
+      />
+      <Box sx={{ display: "flex", mb: 3 }}>
         <MonthStastics />
         <LiveBookStatus />
       </Box>
-      {/* {user?.userType === "admin" ? <AdminContent /> : <OwnerContent />} */}
-      {/* </LayoutWithDrawer> */}
     </>
   );
 }

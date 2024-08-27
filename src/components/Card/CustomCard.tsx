@@ -1,7 +1,12 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import { CardActionArea, CardActions, Typography } from "@mui/material";
+import {
+  capitalize,
+  CardActionArea,
+  CardActions,
+  Typography,
+} from "@mui/material";
 import { Book } from "../../types/bookTypes";
 import LinkButton from "../Button/LinkButton";
 import { Link } from "raviger";
@@ -31,7 +36,13 @@ export default function CustomCard(props: { data: Book }) {
   const multipleCopies = (data?.copies?.length as number) > 1;
 
   return (
-    <Card sx={{ maxWidth: 345, height: 350 }}>
+    <Card
+      sx={{
+        maxWidth: 345,
+        height: 350,
+        boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <CardActionArea>
         <Link href={`/bookDetails/${data.id}`}>
           <CardMedia
@@ -42,7 +53,11 @@ export default function CustomCard(props: { data: Book }) {
           />
         </Link>
         <CardContent>
-          <CustomText text={data.book_title} fontSize={20} fontWeight={300} />
+          <CustomText
+            text={capitalize(data.book_title)}
+            fontSize={20}
+            fontWeight={300}
+          />
           {multipleCopies && (
             <CustomText
               text="Multiple Copies Available"

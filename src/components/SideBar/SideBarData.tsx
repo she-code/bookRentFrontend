@@ -5,23 +5,39 @@ import {
   Logout,
   People,
   Shop,
+  Upload,
 } from "@mui/icons-material";
-import { useAppDispacth } from "../../app/hooks";
+import { useAppDispacth, useAppSelector } from "../../app/hooks";
 import { logoutUser } from "../../features/Auth/authActions";
-import { ActiveLink } from "raviger";
+import { ActiveLink, navigate } from "raviger";
 import { getAuthToken } from "../../utils/storageUtils";
 import { Box, Button, Typography } from "@mui/material";
+import { defineAbilitiesFor } from "../../utils/ability";
+import { User } from "../../types/userTypes";
+import { Secondary_Color } from "../../config/constants";
 
 const SidebarData = (props: { toggle: boolean }) => {
   const { toggle } = props;
   const dispatch = useAppDispacth();
+  const { user } = useAppSelector((state) => state.auth);
+  const ability = defineAbilitiesFor(user as User);
+  function handleLogout(): void {
+    dispatch(logoutUser());
+    navigate("/");
+  }
+
   const data = [
     {
       page: "Dashboard",
       url: "/dashboard",
       icon: <Dashboard />,
     },
-    { page: "Owners", url: "/Owners", icon: <People /> },
+    ...(ability.can("view", "Owners")
+      ? [{ page: "Owners", url: "/owners", icon: <People /> }]
+      : []),
+    ...(ability.can("view", "UploadBook")
+      ? [{ page: "Upload Book", url: "/uploadBook", icon: <Upload /> }]
+      : []),
     { page: "Books", url: "/books", icon: <Book /> },
     { page: "Rents", url: "/rents", icon: <Shop /> },
 
@@ -31,8 +47,7 @@ const SidebarData = (props: { toggle: boolean }) => {
             page: "Logout",
             icon: <Logout />,
             onclick: () => {
-              dispatch(logoutUser());
-              // window.location.reload();
+              handleLogout();
             },
           },
         ]
@@ -54,7 +69,7 @@ const SidebarData = (props: { toggle: boolean }) => {
             aria-label={link.page}
             href={link.url}
             key={link.page}
-            exactActiveClass={`bg-white`}
+            exactActiveClass={`backgroundColor:${Secondary_Color}`}
             style={{
               padding: "1rem",
               fontSize: "1.25rem",
@@ -116,7 +131,7 @@ const SidebarData = (props: { toggle: boolean }) => {
               bottom: "1rem",
               "&:hover": {
                 backgroundColor: "white",
-                color: "brown", // Adjust to match your text color on hover
+                color: "brown",
               },
             }}
           >

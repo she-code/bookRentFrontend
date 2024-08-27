@@ -33,6 +33,7 @@ export type BookStateType = {
   availability?: string;
   categoryId?: number;
   ownerBooks: BookCopy[];
+  approvedCopies: BookCopy[];
   bookCopy: BookCopy | null;
 };
 

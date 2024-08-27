@@ -104,6 +104,9 @@ export const getCurrentUser = () => {
 export const getAllCustomers = () => {
   return request("users/getAllCustomers", "GET", {});
 };
+export const getOwner = (id: number) => {
+  return request(`users/getOwner/${id}`, "GET", {});
+};
 export const getOwnerRequests = () => {
   return request("users/getOwnerRequests", "GET", {});
 };
@@ -118,6 +121,9 @@ export const updateOwnerStatus = (id: number, isDisabled: boolean) => {
 
 export const getBookRequests = () => {
   return request("books/getBookRequests", "GET", {});
+};
+export const getApprovedCopies = () => {
+  return request("books/getApprovedCopies", "GET", {});
 };
 export const getAllBooks = () => {
   return request("books/getAllBooks", "GET", {});

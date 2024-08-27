@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getApprovedBooksSuccess,
+  getBookApprovedCopiesSuccess,
   getBookCopySuccess,
   getBooksSuccess,
   getBookSuccess,
@@ -15,6 +16,7 @@ import { Book } from "../../types/bookTypes";
 import {
   deleteBookAPI,
   getAllBooks,
+  getApprovedCopies,
   getBook,
   getBookCopy,
   getBookCopyEdit,
@@ -73,10 +75,11 @@ export const updateBookStatusThunk = createAsyncThunk(
       dispatch(requestStart());
 
       const response = await updateBookStatus(payload.id, payload.status);
-      console.log({ response });
       // Check the response status
       if (response.statusCode === 200) {
-        dispatch(updateBookStatusSuccess({ id: payload.id }));
+        dispatch(
+          updateBookStatusSuccess({ id: payload.id, book: response.data })
+        );
       } else {
         // Handle specific response errors
         const errorMessage =
@@ -184,6 +187,28 @@ export const fetchOwnerBooks = createAsyncThunk(
       console.log({ response });
       if (response.statusCode === 200) {
         dispatch(getOwnerBooksSuccess(response.data));
+      } else {
+        // Handle specific response errors
+        const errorMessage = response.message || "Unable to fetch books";
+        dispatch(requestFailure(errorMessage));
+      }
+    } catch (error) {
+      // Handle network or other errors
+      dispatch(requestFailure((error as Error).message));
+    }
+  }
+);
+
+export const fetchApprovedCoppies = createAsyncThunk(
+  "books/fetchApprovedCoppies",
+  async (_, { dispatch }) => {
+    dispatch(requestStart());
+
+    try {
+      const response = await getApprovedCopies();
+      console.log({ response });
+      if (response.statusCode === 200) {
+        dispatch(getBookApprovedCopiesSuccess(response.data));
       } else {
         // Handle specific response errors
         const errorMessage = response.message || "Unable to fetch books";

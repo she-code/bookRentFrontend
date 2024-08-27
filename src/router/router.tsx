@@ -18,6 +18,7 @@ import AppContainer from "../components/AppContainer";
 import { useRoutes } from "raviger";
 import { Suspense } from "react";
 import Loading from "../components/Loading/Loading";
+import UploadBook from "../features/Book/UploadBook";
 
 export default function AppRouter(props: {
   collapsed: boolean;
@@ -59,6 +60,11 @@ export default function AppRouter(props: {
     "/customers": () => (
       <ProtectedRoute>
         <CustomersPage />
+      </ProtectedRoute>
+    ),
+    "/uploadBook": () => (
+      <ProtectedRoute>
+        <UploadBook />
       </ProtectedRoute>
     ),
     "/rents": () => (
